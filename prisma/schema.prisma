@@ -1,104 +1,250 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
 generator client {
-  provider = "prisma-client-js"
-}
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+export interface Campus {  provider = "prisma-client-js"
 
-model Account {
-  id                String  @id @default(cuid())
+  id: string;}
+
+  name: string;
+
+  description?: string;datasource db {
+
+  address?: string;  provider = "postgresql"
+
+  phone?: string;  url      = env("DATABASE_URL")
+
+  email?: string;}
+
+  churchId: string;
+
+  isActive: boolean;model Account {
+
+}  id                String  @id @default(cuid())
+
   userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+interface CampusContextType {  type              String
+
+  currentCampus: Campus | null;  provider          String
+
+  availableCampuses: Campus[];  providerAccountId String
+
+  switchCampus: (campusId: string) => void;  refresh_token     String? @db.Text
+
+  isLoading: boolean;  access_token      String? @db.Text
+
+}  expires_at        Int?
+
+  token_type        String?
+
+const CampusContext = createContext<CampusContextType | undefined>(undefined);  scope             String?
+
+  id_token          String? @db.Text
+
+export function CampusProvider({ children }: { children: React.ReactNode }) {  session_state     String?
+
+  const [currentCampus, setCurrentCampus] = useState<Campus | null>(null);
+
+  const [availableCampuses, setAvailableCampuses] = useState<Campus[]>([]);  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  const [isLoading, setIsLoading] = useState(true);
 
   @@unique([provider, providerAccountId])
-}
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+  useEffect(() => {}
+
+    // Load campuses from API
+
+    loadCampuses();model Session {
+
+      id           String   @id @default(cuid())
+
+    // Load saved campus preference from localStorage  sessionToken String   @unique
+
+    const savedCampusId = localStorage.getItem('selectedCampusId');  userId       String
+
+    if (savedCampusId) {  expires      DateTime
+
+      loadCampus(savedCampusId);  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    }}
+
+  }, []);
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  role          UserRole  @default(MEMBER)
-  
-  accounts      Account[]
-  sessions      Session[]
-  churches      ChurchMember[]
-  memberProgress PathwayProgress[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+
+  const loadCampuses = async () => {  id            String    @id @default(cuid())
+
+    try {  name          String?
+
+      // TODO: Replace with actual API call  email         String    @unique
+
+      const mockCampuses: Campus[] = [  emailVerified DateTime?
+
+        {  image         String?
+
+          id: '1',  role          UserRole  @default(MEMBER)
+
+          name: 'Main Campus',  
+
+          description: 'Our original location',  accounts      Account[]
+
+          address: '123 Main St, City, State',  sessions      Session[]
+
+          churchId: 'church-1',  churches      ChurchMember[]
+
+          isActive: true,  memberProgress PathwayProgress[]
+
+        },  lifeGroups    LifeGroupMember[]
+
+        {  eventRegistrations EventRegistration[]
+
+          id: '2',  
+
+          name: 'North Campus',  createdAt     DateTime  @default(now())
+
+          description: 'North side location',  updatedAt     DateTime  @updatedAt
+
+          address: '456 North Ave, City, State',}
+
+          churchId: 'church-1',
+
+          isActive: true,model VerificationToken {
+
+        },  identifier String
+
+        {  token      String   @unique
+
+          id: '3',  expires    DateTime
+
+          name: 'Online Campus',
+
+          description: 'Virtual campus for online attendees',  @@unique([identifier, token])
+
+          churchId: 'church-1',}
+
+          isActive: true,
+
+        },model Church {
+
+      ];  id          String   @id @default(cuid())
+
+        name        String
+
+      setAvailableCampuses(mockCampuses);  description String?
+
+        address     String?
+
+      // Set default campus if none selected  phone       String?
+
+      if (!currentCampus && mockCampuses.length > 0) {  email       String?
+
+        setCurrentCampus(mockCampuses[0]);  website     String?
+
+      }  
+
+    } catch (error) {  members     ChurchMember[]
+
+      console.error('Error loading campuses:', error);  pathways    Pathway[]
+
+    } finally {  campuses    Campus[]
+
+      setIsLoading(false);  
+
+    }  createdAt   DateTime @default(now())
+
+  };  updatedAt   DateTime @updatedAt
+
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+  const loadCampus = async (campusId: string) => {
 
-  @@unique([identifier, token])
-}
+    const campus = availableCampuses.find(c => c.id === campusId);model Campus {
 
-model Church {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  address     String?
+    if (campus) {  id          String   @id @default(cuid())
+
+      setCurrentCampus(campus);  name        String
+
+    }  description String?
+
+  };  address     String?
+
   phone       String?
-  email       String?
-  website     String?
-  
-  members     ChurchMember[]
-  pathways    Pathway[]
-  
+
+  const switchCampus = (campusId: string) => {  email       String?
+
+    const campus = availableCampuses.find(c => c.id === campusId);  churchId    String
+
+    if (campus) {  isActive    Boolean  @default(true)
+
+      setCurrentCampus(campus);  
+
+      localStorage.setItem('selectedCampusId', campusId);  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+        members     ChurchMember[]
+
+      // Refresh page data for new campus  pathways    Pathway[]
+
+      window.location.reload();  lifeGroups  LifeGroup[]
+
+    }  events      Event[]
+
+  };  
+
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
 
-model ChurchMember {
-  id         String     @id @default(cuid())
-  userId     String
-  churchId   String
-  role       ChurchRole @default(MEMBER)
-  joinedAt   DateTime   @default(now())
-  
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  church     Church     @relation(fields: [churchId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, churchId])
-}
+  return (  updatedAt   DateTime @updatedAt
 
-model Pathway {
-  id          String   @id @default(cuid())
-  name        String
+    <CampusContext.Provider}
+
+      value={{
+
+        currentCampus,model ChurchMember {
+
+        availableCampuses,  id         String     @id @default(cuid())
+
+        switchCampus,  userId     String
+
+        isLoading,  churchId   String
+
+      }}  campusId   String?
+
+    >  role       ChurchRole @default(MEMBER)
+
+      {children}  joinedAt   DateTime   @default(now())
+
+    </CampusContext.Provider>  
+
+  );  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+}  church     Church     @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+  campus     Campus?    @relation(fields: [campusId], references: [id])
+
+export function useCampus() {  
+
+  const context = useContext(CampusContext);  @@unique([userId, churchId])
+
+  if (context === undefined) {}
+
+    throw new Error('useCampus must be used within a CampusProvider');
+
+  }model Pathway {
+
+  return context;  id          String   @id @default(cuid())
+
+}  name        String
   description String?
   churchId    String
+  campusId    String?
   isActive    Boolean  @default(true)
   
   church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  campus      Campus?  @relation(fields: [campusId], references: [id])
   steps       PathwayStep[]
   progress    PathwayProgress[]
   
@@ -151,6 +297,72 @@ model StepCompletion {
   @@unique([progressId, stepId])
 }
 
+model LifeGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  churchId    String
+  campusId    String?
+  leaderId    String?
+  meetingDay  String?
+  meetingTime String?
+  location    String?
+  isActive    Boolean  @default(true)
+  maxMembers  Int?
+  
+  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  campus      Campus?  @relation(fields: [campusId], references: [id])
+  members     LifeGroupMember[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LifeGroupMember {
+  id          String   @id @default(cuid())
+  userId      String
+  groupId     String
+  role        GroupRole @default(MEMBER)
+  joinedAt    DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group       LifeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, groupId])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  location    String?
+  churchId    String
+  campusId    String?
+  capacity    Int?
+  isPublic    Boolean  @default(true)
+  
+  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  campus      Campus?  @relation(fields: [campusId], references: [id])
+  registrations EventRegistration[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EventRegistration {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  status    RegistrationStatus @default(REGISTERED)
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, eventId])
+}
+
 enum UserRole {
   SUPER_ADMIN
   CHURCH_ADMIN
@@ -164,4 +376,17 @@ enum ChurchRole {
   PASTOR
   LEADER
   MEMBER
+}
+
+enum GroupRole {
+  LEADER
+  CO_LEADER
+  MEMBER
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  WAITLISTED
+  CANCELLED
+  ATTENDED
 }

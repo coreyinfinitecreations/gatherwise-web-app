@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { VisualWebsiteEditor } from "@/components/website/visual-editor";
+// import { VisualWebsiteEditor } from "@/components/website/visual-editor";
 import {
   Table,
   TableBody,
@@ -225,7 +225,21 @@ export default function WebsitePage() {
 
           {/* Visual Editor Tab */}
           <TabsContent value="editor">
-            <VisualWebsiteEditor />
+            {/* <VisualWebsiteEditor /> */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Visual Editor</CardTitle>
+                <CardDescription>
+                  Visual editor temporarily disabled for build fixes
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  The visual website editor will be restored after fixing
+                  TypeScript issues.
+                </p>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Pages Tab */}

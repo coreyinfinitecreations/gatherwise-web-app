@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -66,7 +66,29 @@ interface ContentBlock {
     | "staff"
     | "testimonials"
     | "spacer";
-  content: any;
+  content: {
+    text?: string;
+    tag?: string;
+    link?: string;
+    src?: string;
+    alt?: string;
+    caption?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    events?: Array<{
+      title: string;
+      date: string;
+      time: string;
+      location: string;
+    }>;
+    [key: string]:
+      | string
+      | number
+      | boolean
+      | Array<Record<string, unknown>>
+      | undefined; // Flexible content properties
+  };
   style: {
     backgroundColor?: string;
     textColor?: string;
@@ -241,7 +263,7 @@ export function VisualWebsiteEditor() {
   const addBlock = (sectionId: string, blockType: string) => {
     const newBlock: ContentBlock = {
       id: `${blockType}-${Date.now()}`,
-      type: blockType as any,
+      type: blockType as ContentBlock["type"],
       content: getDefaultContent(blockType),
       style: getDefaultStyle(blockType),
     };
@@ -323,8 +345,18 @@ export function VisualWebsiteEditor() {
       case "events":
         return {
           events: [
-            { title: "Sunday Service", date: "Every Sunday", time: "10:00 AM" },
-            { title: "Bible Study", date: "Wednesdays", time: "7:00 PM" },
+            {
+              title: "Sunday Service",
+              date: "Every Sunday",
+              time: "10:00 AM",
+              location: "Main Sanctuary",
+            },
+            {
+              title: "Bible Study",
+              date: "Wednesdays",
+              time: "7:00 PM",
+              location: "Fellowship Hall",
+            },
           ],
         };
       default:
@@ -386,10 +418,9 @@ export function VisualWebsiteEditor() {
 
     switch (block.type) {
       case "text":
-        const Tag = block.content.tag || "p";
         return (
-          <Tag key={block.id} {...commonProps}>
-            {block.content.text}
+          <div key={block.id} {...commonProps}>
+            <p style={{ all: "inherit" }}>{block.content.text}</p>
             {isSelected && !previewMode && (
               <Button
                 size="sm"
@@ -403,7 +434,7 @@ export function VisualWebsiteEditor() {
                 <Edit3 className="h-3 w-3" />
               </Button>
             )}
-          </Tag>
+          </div>
         );
 
       case "image":
@@ -529,14 +560,24 @@ export function VisualWebsiteEditor() {
               Upcoming Events
             </h3>
             <div className="space-y-4">
-              {block.content.events?.map((event: any, index: number) => (
-                <div key={index} className="border-l-4 border-primary pl-4">
-                  <h4 className="font-semibold">{event.title}</h4>
-                  <p className="text-sm text-gray-600">
-                    {event.date} at {event.time}
-                  </p>
-                </div>
-              ))}
+              {block.content.events?.map(
+                (
+                  event: {
+                    title: string;
+                    date: string;
+                    time: string;
+                    location: string;
+                  },
+                  index: number
+                ) => (
+                  <div key={index} className="border-l-4 border-primary pl-4">
+                    <h4 className="font-semibold">{event.title}</h4>
+                    <p className="text-sm text-gray-600">
+                      {event.date} at {event.time}
+                    </p>
+                  </div>
+                )
+              )}
             </div>
             {isSelected && !previewMode && (
               <Button
@@ -832,7 +873,7 @@ export function VisualWebsiteEditor() {
                           updateBlock(selectedSection, currentBlock.id, {
                             style: {
                               ...currentBlock.style,
-                              textAlign: align as any,
+                              textAlign: align as "left" | "center" | "right",
                             },
                           })
                         }

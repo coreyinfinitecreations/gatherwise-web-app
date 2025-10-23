@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Search, Settings, User, LogOut, Plus } from "lucide-react";
+import { CampusSelector } from "@/components/campus/campus-selector";
 
 export function DashboardHeader() {
   return (
@@ -21,6 +22,9 @@ export function DashboardHeader() {
       {/* Left side */}
       <div className="flex items-center gap-4">
         <SidebarTrigger className="-ml-1" />
+
+        {/* Campus Selector */}
+        <CampusSelector />
 
         {/* Search */}
         <div className="w-96">

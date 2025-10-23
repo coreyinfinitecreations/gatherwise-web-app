@@ -28,6 +28,7 @@ import {
   ChevronRight,
   Church,
   Heart,
+  MapPin,
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -76,6 +77,11 @@ const navigation = [
       { title: "Email Campaigns", url: "/dashboard/communication/email" },
       { title: "Announcements", url: "/dashboard/communication/announcements" },
     ],
+  },
+  {
+    title: "Campuses",
+    icon: MapPin,
+    url: "/dashboard/campuses",
   },
   {
     title: "Website",
