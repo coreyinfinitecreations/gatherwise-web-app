@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useAuth } from "./auth-context";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface Campus {
   id: string;
@@ -16,86 +18,94 @@ export interface Campus {
 interface CampusContextType {
   currentCampus: Campus | null;
   availableCampuses: Campus[];
-  switchCampus: (campusId: string) => void;
+  switchCampus: (campusId: string) => Promise<void>;
   isLoading: boolean;
+  refetchCampuses: () => Promise<void>;
 }
 
 const CampusContext = createContext<CampusContextType | undefined>(undefined);
 
 export function CampusProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [currentCampus, setCurrentCampus] = useState<Campus | null>(null);
   const [availableCampuses, setAvailableCampuses] = useState<Campus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Load campuses from API
-    loadCampuses();
-
-    // Load saved campus preference from localStorage
-    const savedCampusId = localStorage.getItem("selectedCampusId");
-    if (savedCampusId) {
-      loadCampus(savedCampusId);
-    }
-  }, []);
-
   const loadCampuses = async () => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      // TODO: Replace with actual API call
-      const mockCampuses: Campus[] = [
-        {
-          id: "1",
-          name: "Main Campus",
-          description: "Our original location",
-          address: "123 Main St, City, State",
-          churchId: "church-1",
-          isActive: true,
+      const response = await fetch("/api/campuses", {
+        headers: {
+          "x-user-id": user.id,
         },
-        {
-          id: "2",
-          name: "North Campus",
-          description: "North side location",
-          address: "456 North Ave, City, State",
-          churchId: "church-1",
-          isActive: true,
-        },
-        {
-          id: "3",
-          name: "Online Campus",
-          description: "Virtual campus for online attendees",
-          churchId: "church-1",
-          isActive: true,
-        },
-      ];
+      });
 
-      setAvailableCampuses(mockCampuses);
+      if (!response.ok) {
+        throw new Error("Failed to fetch campuses");
+      }
 
-      // Set default campus if none selected
-      if (!currentCampus && mockCampuses.length > 0) {
-        setCurrentCampus(mockCampuses[0]);
+      const data = await response.json();
+      setAvailableCampuses(data.campuses);
+
+      if (user.campusId) {
+        const userCampus = data.campuses.find(
+          (c: Campus) => c.id === user.campusId
+        );
+        setCurrentCampus(userCampus || data.campuses[0] || null);
+      } else if (data.campuses.length > 0) {
+        setCurrentCampus(data.campuses[0]);
       }
     } catch (error) {
       console.error("Error loading campuses:", error);
+      setAvailableCampuses([]);
+      setCurrentCampus(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loadCampus = async (campusId: string) => {
+  useEffect(() => {
+    loadCampuses();
+  }, [user?.id]);
+
+  const switchCampus = async (campusId: string) => {
+    if (!user?.id) return;
+
     const campus = availableCampuses.find((c) => c.id === campusId);
-    if (campus) {
-      setCurrentCampus(campus);
+    if (!campus) return;
+
+    const previousCampus = currentCampus;
+    setCurrentCampus(campus);
+
+    try {
+      const response = await fetch("/api/user/campus", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user.id,
+        },
+        body: JSON.stringify({ campusId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update campus");
+      }
+
+      await queryClient.invalidateQueries();
+    } catch (error) {
+      console.error("Error switching campus:", error);
+      setCurrentCampus(previousCampus);
     }
   };
 
-  const switchCampus = (campusId: string) => {
-    const campus = availableCampuses.find((c) => c.id === campusId);
-    if (campus) {
-      setCurrentCampus(campus);
-      localStorage.setItem("selectedCampusId", campusId);
-
-      // Refresh page data for new campus
-      window.location.reload();
-    }
+  const refetchCampuses = async () => {
+    setIsLoading(true);
+    await loadCampuses();
   };
 
   return (
@@ -105,6 +115,7 @@ export function CampusProvider({ children }: { children: React.ReactNode }) {
         availableCampuses,
         switchCampus,
         isLoading,
+        refetchCampuses,
       }}
     >
       {children}

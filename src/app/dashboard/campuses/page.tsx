@@ -1,3 +1,7 @@
+"use client";
+
+import { useAuth } from "@/contexts/auth-context";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import {
   Card,
@@ -34,87 +38,105 @@ import {
   Trash2,
   Settings,
 } from "lucide-react";
-
-// Mock data - replace with real data from your API
-const campuses = [
-  {
-    id: "1",
-    name: "Main Campus",
-    description: "Our original location in downtown",
-    address: "123 Main St, City, State 12345",
-    phone: "(555) 123-4567",
-    email: "main@gracechurch.org",
-    isActive: true,
-    memberCount: 856,
-    lifeGroupCount: 24,
-    upcomingEvents: 8,
-  },
-  {
-    id: "2",
-    name: "North Campus",
-    description: "Serving the north side of the city",
-    address: "456 North Ave, City, State 12345",
-    phone: "(555) 234-5678",
-    email: "north@gracechurch.org",
-    isActive: true,
-    memberCount: 423,
-    lifeGroupCount: 12,
-    upcomingEvents: 5,
-  },
-  {
-    id: "3",
-    name: "Online Campus",
-    description: "Virtual campus for online attendees",
-    address: "Online",
-    phone: null,
-    email: "online@gracechurch.org",
-    isActive: true,
-    memberCount: 234,
-    lifeGroupCount: 8,
-    upcomingEvents: 3,
-  },
-  {
-    id: "4",
-    name: "South Campus",
-    description: "Future location (coming soon)",
-    address: "789 South Blvd, City, State 12345",
-    phone: null,
-    email: "south@gracechurch.org",
-    isActive: false,
-    memberCount: 0,
-    lifeGroupCount: 0,
-    upcomingEvents: 0,
-  },
-];
-
-const stats = [
-  {
-    title: "Total Campuses",
-    value: "4",
-    subtitle: "3 active, 1 planned",
-    icon: MapPin,
-  },
-  {
-    title: "Total Members",
-    value: "1,513",
-    subtitle: "Across all campuses",
-    icon: Users,
-  },
-  {
-    title: "Total Life Groups",
-    value: "44",
-    subtitle: "All campuses combined",
-    icon: Heart,
-  },
-  {
-    title: "Upcoming Events",
-    value: "16",
-    subtitle: "Next 30 days",
-    icon: Calendar,
-  },
-];
+import { AddCampusDialog } from "@/components/campus/add-campus-dialog";
 
 export default function CampusesPage() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data: userChurchData } = useQuery({
+    queryKey: ["user-church", user?.id],
+    queryFn: async () => {
+      const response = await fetch("/api/profile", {
+        headers: {
+          "x-user-id": user?.id || "",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      return response.json();
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: campusesData, isLoading } = useQuery({
+    queryKey: ["campuses"],
+    queryFn: async () => {
+      const response = await fetch("/api/campuses", {
+        headers: {
+          "x-user-id": user?.id || "",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch campuses");
+      }
+
+      return response.json();
+    },
+    enabled: !!user?.id,
+  });
+
+  const campuses = campusesData?.campuses || [];
+  const churchId =
+    userChurchData?.churchId ||
+    (campuses.length > 0 ? campuses[0].churchId : null);
+
+  const activeCampuses = campuses.filter((c: any) => c.isActive);
+  const totalMembers = 0;
+  const totalLifeGroups = campuses.reduce(
+    (sum: number, c: any) => sum + (c._count?.lifeGroups || 0),
+    0
+  );
+  const totalEvents = campuses.reduce(
+    (sum: number, c: any) => sum + (c._count?.events || 0),
+    0
+  );
+
+  const stats = [
+    {
+      title: "Total Campuses",
+      value: campuses.length.toString(),
+      subtitle: `${activeCampuses.length} active, ${
+        campuses.length - activeCampuses.length
+      } planned`,
+      icon: MapPin,
+    },
+    {
+      title: "Total Members",
+      value: totalMembers.toLocaleString(),
+      subtitle: "Across all campuses",
+      icon: Users,
+    },
+    {
+      title: "Total Life Groups",
+      value: totalLifeGroups.toString(),
+      subtitle: "All campuses combined",
+      icon: Heart,
+    },
+    {
+      title: "Upcoming Events",
+      value: totalEvents.toString(),
+      subtitle: "Next 30 days",
+      icon: Calendar,
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex-1 space-y-6 p-6">
+          <div className="flex items-center justify-center h-96">
+            <div className="text-muted-foreground">Loading campuses...</div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="flex-1 space-y-6 p-6">
@@ -128,10 +150,7 @@ export default function CampusesPage() {
               Manage your church locations and campus-specific data
             </p>
           </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Campus
-          </Button>
+          {churchId && <AddCampusDialog churchId={churchId} />}
         </div>
 
         {/* Stats */}
@@ -181,7 +200,7 @@ export default function CampusesPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {campuses.map((campus) => (
+                    {campuses.map((campus: any) => (
                       <TableRow key={campus.id}>
                         <TableCell>
                           <div>
@@ -211,9 +230,7 @@ export default function CampusesPage() {
                         </TableCell>
                         <TableCell>
                           <div className="text-center">
-                            <div className="font-medium">
-                              {campus.memberCount}
-                            </div>
+                            <div className="font-medium">0</div>
                             <div className="text-xs text-muted-foreground">
                               members
                             </div>
@@ -222,7 +239,7 @@ export default function CampusesPage() {
                         <TableCell>
                           <div className="text-center">
                             <div className="font-medium">
-                              {campus.lifeGroupCount}
+                              {campus._count?.lifeGroups || 0}
                             </div>
                             <div className="text-xs text-muted-foreground">
                               groups
@@ -232,7 +249,7 @@ export default function CampusesPage() {
                         <TableCell>
                           <div className="text-center">
                             <div className="font-medium">
-                              {campus.upcomingEvents}
+                              {campus._count?.events || 0}
                             </div>
                             <div className="text-xs text-muted-foreground">
                               upcoming

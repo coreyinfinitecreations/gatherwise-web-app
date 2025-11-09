@@ -83,14 +83,14 @@
   --chart-5: var(--gw-dark);
 
   /* Sidebar colors */
-  --sidebar: var(--gw-white);
-  --sidebar-foreground: var(--gw-dark);
-  --sidebar-primary: var(--gw-primary);
-  --sidebar-primary-foreground: var(--gw-white);
-  --sidebar-accent: var(--gw-secondary);
+  --sidebar: var(--gw-primary);
+  --sidebar-foreground: var(--gw-white);
+  --sidebar-primary: var(--gw-white);
+  --sidebar-primary-foreground: var(--gw-primary);
+  --sidebar-accent: rgba(255, 255, 255, 0.1);
   --sidebar-accent-foreground: var(--gw-white);
-  --sidebar-border: #e5e7eb;
-  --sidebar-ring: var(--gw-primary);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: var(--gw-white);
 }
 
 .dark {
@@ -129,6 +129,9 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  html {
+    overflow-y: scroll;
   }
 }
 

@@ -11,6 +11,7 @@ interface AuthContextType {
   loginWithPasskey: (email?: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  updateUser: (updatedUser: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -150,6 +151,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/login");
   };
 
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -159,6 +165,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loginWithPasskey,
         logout,
         isAuthenticated,
+        updateUser,
       }}
     >
       {children}

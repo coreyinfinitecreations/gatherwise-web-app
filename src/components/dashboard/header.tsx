@@ -24,9 +24,44 @@ import {
 } from "lucide-react";
 import { CampusSelector } from "@/components/campus/campus-selector";
 import { useAuth } from "@/contexts/auth-context";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
+  const [hasMultipleCampuses, setHasMultipleCampuses] = useState(false);
+
+  useEffect(() => {
+    const fetchUserSettings = async () => {
+      if (!user?.id) return;
+
+      try {
+        const response = await fetch("/api/profile", {
+          headers: {
+            "x-user-id": user.id,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setHasMultipleCampuses(data.user?.hasMultipleCampuses || false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user settings:", error);
+      }
+    };
+
+    fetchUserSettings();
+  }, [user?.id]);
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-background px-6 w-full">
@@ -34,8 +69,8 @@ export function DashboardHeader() {
       <div className="flex items-center gap-4">
         <SidebarTrigger className="-ml-1" />
 
-        {/* Campus Selector */}
-        <CampusSelector />
+        {/* Campus Selector - Only show if user has multiple campuses */}
+        {hasMultipleCampuses && <CampusSelector />}
 
         {/* Search */}
         <div className="w-96">
@@ -43,7 +78,7 @@ export function DashboardHeader() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search members, groups, pathways..."
-              className="pl-10 bg-muted/50"
+              className="pl-10 bg-muted/50 border-border"
             />
           </div>
         </div>
@@ -108,8 +143,13 @@ export function DashboardHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10">
-                <AvatarImage src="/avatars/pastor-john.jpg" alt="Pastor John" />
-                <AvatarFallback>PJ</AvatarFallback>
+                <AvatarImage
+                  src="/avatars/pastor-john.jpg"
+                  alt={user?.name || "User"}
+                />
+                <AvatarFallback className="bg-primary text-white">
+                  {user?.name ? getInitials(user.name) : "U"}
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -129,17 +169,21 @@ export function DashboardHeader() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/profile" className="cursor-pointer group">
+                <User className="mr-2 h-4 w-4 group-hover:text-white" />
+                <span>Profile</span>
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings" className="cursor-pointer group">
+                <Settings className="mr-2 h-4 w-4 group-hover:text-white" />
+                <span>Settings</span>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className="text-red-600">
-              <LogOut className="mr-2 h-4 w-4" />
+            <DropdownMenuItem onClick={logout} className="group">
+              <LogOut className="mr-2 h-4 w-4 group-hover:text-white" />
               <span>Sign Out Securely</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

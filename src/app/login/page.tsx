@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import Link from "next/link";
 import {
   Eye,
   EyeOff,
@@ -18,6 +19,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -412,8 +414,8 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
-            {/* Additional Links */}
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3">
             <div className="mt-4 text-center space-y-2">
               <button className="text-sm text-primary hover:underline">
                 Forgot your password?
@@ -422,7 +424,23 @@ export default function LoginPage() {
                 Need help? Contact your church administrator
               </div>
             </div>
-          </CardContent>
+
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">
+                  Don't have an account?
+                </span>
+              </div>
+            </div>
+            <Link href="/test/register" className="w-full">
+              <Button variant="outline" className="w-full">
+                Create an Account
+              </Button>
+            </Link>
+          </CardFooter>
         </Card>
 
         {/* Security Features */}

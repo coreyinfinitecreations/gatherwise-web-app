@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server";
 import { UserManager } from "@/lib/auth/user-manager";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, organizationName } = body;
+    const { email, password, organizationName, address, city, state, zipCode } =
+      body;
 
     // Validate required fields
-    if (!email || !password || !organizationName) {
+    if (
+      !email ||
+      !password ||
+      !organizationName ||
+      !address ||
+      !city ||
+      !state ||
+      !zipCode
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields: email, password, organizationName" },
+        {
+          error:
+            "Missing required fields: email, password, organizationName, address, city, state, zipCode",
+        },
         { status: 400 }
       );
     }
@@ -44,6 +57,47 @@ export async function POST(request: Request) {
       email: newUser.email,
       name: newUser.name,
       role: newUser.role,
+    });
+
+    // Create church and default campus
+    const church = await prisma.church.create({
+      data: {
+        name: organizationName,
+        description: `Welcome to ${organizationName}`,
+        address: `${address}, ${city}, ${state} ${zipCode}`,
+        members: {
+          create: {
+            userId: newUser.id,
+            role: "ADMIN",
+          },
+        },
+        campuses: {
+          create: {
+            name: "Main Campus",
+            description: "Our primary location",
+            address: `${address}, ${city}, ${state} ${zipCode}`,
+            isActive: true,
+          },
+        },
+      },
+      include: {
+        campuses: true,
+      },
+    });
+
+    console.log("✅ Church and campus created:", {
+      churchId: church.id,
+      churchName: church.name,
+      campusId: church.campuses[0]?.id,
+      campusName: church.campuses[0]?.name,
+    });
+
+    // Update user with the default campus
+    await prisma.user.update({
+      where: { id: newUser.id },
+      data: {
+        campusId: church.campuses[0]?.id,
+      },
     });
 
     // Create a session token (simple JWT-like structure for demo)

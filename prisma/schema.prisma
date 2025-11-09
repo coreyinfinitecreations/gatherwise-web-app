@@ -46,10 +46,17 @@ model User {
   organizationId      String?
   organizationName    String?
   campusId            String?
+  phone               String?
+  address             String?
+  city                String?
+  state               String?
+  zipCode             String?
   isActive            Boolean              @default(true)
   loginAttempts       Int                  @default(0)
   lockedUntil         DateTime?
   lastLogin           DateTime?
+  onboardingCompleted Boolean              @default(false)
+  hasMultipleCampuses Boolean              @default(false)
   accounts            Account[]
   sessions            Session[]
   churches            ChurchMember[]
@@ -69,20 +76,21 @@ model VerificationToken {
 }
 
 model Church {
-  id          String         @id @default(cuid())
-  name        String
-  description String?
-  address     String?
-  phone       String?
-  email       String?
-  website     String?
-  members     ChurchMember[]
-  pathways    Pathway[]
-  campuses    Campus[]
-  lifeGroups  LifeGroup[]
-  events      Event[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id                      String         @id @default(cuid())
+  name                    String
+  description             String?
+  address                 String?
+  phone                   String?
+  email                   String?
+  website                 String?
+  observesChurchMembership Boolean       @default(true)
+  members                 ChurchMember[]
+  pathways                Pathway[]
+  campuses                Campus[]
+  lifeGroups              LifeGroup[]
+  events                  Event[]
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
 }
 
 model Campus {

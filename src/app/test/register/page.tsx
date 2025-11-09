@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { StateSelect } from "@/components/ui/state-select";
 
 export default function TestRegisterPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedState, setSelectedState] = useState("");
   const [success, setSuccess] = useState<{
     adminId: string;
     organizationId: string;
@@ -26,8 +28,21 @@ export default function TestRegisterPage() {
     const firstName = formData.get("firstName")?.toString().trim();
     const lastName = formData.get("lastName")?.toString().trim();
     const organizationName = formData.get("organization")?.toString().trim();
+    const address = formData.get("address")?.toString().trim();
+    const city = formData.get("city")?.toString().trim();
+    const zipCode = formData.get("zipCode")?.toString().trim();
 
-    if (!email || !password || !firstName || !lastName || !organizationName) {
+    if (
+      !email ||
+      !password ||
+      !firstName ||
+      !lastName ||
+      !organizationName ||
+      !address ||
+      !city ||
+      !selectedState ||
+      !zipCode
+    ) {
       setError("All fields are required");
       setIsLoading(false);
       return;
@@ -56,6 +71,10 @@ export default function TestRegisterPage() {
           password,
           name: `${firstName} ${lastName}`,
           organizationName,
+          address,
+          city,
+          state: selectedState,
+          zipCode,
         }),
       });
 
@@ -75,9 +94,9 @@ export default function TestRegisterPage() {
       const loginSuccess = await login(email, password);
 
       if (loginSuccess) {
-        // Redirect to dashboard after short delay
+        // Redirect to onboarding after short delay
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/onboarding");
         }, 1500);
       } else {
         setError("User created but auto-login failed. Please log in manually.");
@@ -207,6 +226,62 @@ export default function TestRegisterPage() {
             disabled={isLoading || !!success}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
             placeholder="Grace Fellowship"
+          />
+        </div>
+        <div>
+          <label htmlFor="address" className="block text-sm font-medium mb-1">
+            Street Address
+          </label>
+          <input
+            id="address"
+            name="address"
+            type="text"
+            required
+            disabled={isLoading || !!success}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            placeholder="123 Main Street"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="city" className="block text-sm font-medium mb-1">
+              City
+            </label>
+            <input
+              id="city"
+              name="city"
+              type="text"
+              required
+              disabled={isLoading || !!success}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              placeholder="Springfield"
+            />
+          </div>
+          <div>
+            <label htmlFor="state" className="block text-sm font-medium mb-1">
+              State
+            </label>
+            <StateSelect
+              value={selectedState}
+              onChange={setSelectedState}
+              disabled={isLoading || !!success}
+            />
+          </div>
+        </div>
+        <div>
+          <label htmlFor="zipCode" className="block text-sm font-medium mb-1">
+            ZIP Code
+          </label>
+          <input
+            id="zipCode"
+            name="zipCode"
+            type="text"
+            required
+            maxLength={5}
+            pattern="[0-9]{5}"
+            disabled={isLoading || !!success}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            placeholder="12345"
           />
         </div>
         <button

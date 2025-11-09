@@ -30,12 +30,21 @@ import {
   Heart,
   MapPin,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
+import { LucideIcon } from "lucide-react";
 
-const navigation = [
+type NavigationItem = {
+  title: string;
+  icon: LucideIcon;
+  url?: string;
+  items?: { title: string; url: string }[];
+  badge?: string;
+};
+
+const baseNavigation: NavigationItem[] = [
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -79,11 +88,15 @@ const navigation = [
       { title: "Announcements", url: "/dashboard/communication/announcements" },
     ],
   },
-  {
-    title: "Campuses",
-    icon: MapPin,
-    url: "/dashboard/campuses",
-  },
+];
+
+const campusesNavItem: NavigationItem = {
+  title: "Campuses",
+  icon: MapPin,
+  url: "/dashboard/campuses",
+};
+
+const additionalNavigation: NavigationItem[] = [
   {
     title: "Website",
     icon: Globe,
@@ -107,8 +120,38 @@ const navigation = [
 
 export function DashboardSidebar() {
   const [openItems, setOpenItems] = useState<string[]>([]);
+  const [hasMultipleCampuses, setHasMultipleCampuses] = useState(false);
   const { user } = useAuth();
   const organizationName = user?.organizationName || "Your Organization";
+
+  useEffect(() => {
+    const fetchUserSettings = async () => {
+      if (!user?.id) return;
+
+      try {
+        const response = await fetch("/api/profile", {
+          headers: {
+            "x-user-id": user.id,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setHasMultipleCampuses(data.user?.hasMultipleCampuses || false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user settings:", error);
+      }
+    };
+
+    fetchUserSettings();
+  }, [user?.id]);
+
+  const navigation = [
+    ...baseNavigation,
+    ...(hasMultipleCampuses ? [campusesNavItem] : []),
+    ...additionalNavigation,
+  ];
 
   const toggleItem = (title: string) => {
     setOpenItems((prev) =>
@@ -119,15 +162,15 @@ export function DashboardSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-border">
+    <Sidebar className="border-r border-primary-foreground/10 bg-primary">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Church className="h-4 w-4 text-primary-foreground" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
+            <Church className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Gatherwise</h2>
-            <p className="text-xs text-muted-foreground">{organizationName}</p>
+            <h2 className="text-lg font-semibold text-white">Gatherwise</h2>
+            <p className="text-xs text-white/70">{organizationName}</p>
           </div>
         </div>
       </SidebarHeader>
@@ -140,14 +183,14 @@ export function DashboardSidebar() {
                 <>
                   <SidebarMenuButton
                     onClick={() => toggleItem(item.title)}
-                    className="flex w-full items-center justify-between"
+                    className="flex w-full items-center justify-between !text-white hover:!bg-white/10 data-[state=open]:!bg-white/10"
                   >
                     <div className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <item.icon className="h-4 w-4 !text-white" />
+                      <span className="!text-white">{item.title}</span>
                     </div>
                     <ChevronRight
-                      className={`h-4 w-4 transition-transform ${
+                      className={`h-4 w-4 !text-white transition-transform ${
                         openItems.includes(item.title) ? "rotate-90" : ""
                       }`}
                     />
@@ -156,7 +199,10 @@ export function DashboardSidebar() {
                     <SidebarMenuSub>
                       {item.items.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
+                          <SidebarMenuSubButton
+                            asChild
+                            className="!text-white/90 hover:!bg-white/10 hover:!text-white"
+                          >
                             <Link href={subItem.url}>{subItem.title}</Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -165,12 +211,18 @@ export function DashboardSidebar() {
                   )}
                 </>
               ) : (
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  className="!text-white hover:!bg-white/10 data-[active=true]:!bg-white/10"
+                >
                   <Link href={item.url!} className="flex items-center gap-2">
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
+                    <item.icon className="h-4 w-4 !text-white" />
+                    <span className="!text-white">{item.title}</span>
                     {item.badge && (
-                      <Badge variant="secondary" className="ml-auto">
+                      <Badge
+                        variant="secondary"
+                        className="ml-auto bg-white !text-primary"
+                      >
                         {item.badge}
                       </Badge>
                     )}
@@ -182,16 +234,19 @@ export function DashboardSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t">
+      <SidebarFooter className="p-4 border-t border-white/10">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton
+              asChild
+              className="!text-white hover:!bg-white/10"
+            >
               <Link
                 href="/dashboard/settings"
                 className="flex items-center gap-2"
               >
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
+                <Settings className="h-4 w-4 !text-white" />
+                <span className="!text-white">Settings</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

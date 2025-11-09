@@ -12,7 +12,9 @@ async function main() {
   });
 
   if (existingAdmin) {
-    console.log("Admin user already exists, updating organization name...");
+    console.log(
+      "Admin user already exists, checking for church and campuses..."
+    );
 
     await prisma.user.update({
       where: { email: adminEmail },
@@ -21,6 +23,73 @@ async function main() {
         organizationId: "GW-2025-DEMO",
       },
     });
+
+    const existingChurch = await prisma.church.findFirst({
+      where: {
+        members: {
+          some: {
+            userId: existingAdmin.id,
+          },
+        },
+      },
+    });
+
+    if (!existingChurch) {
+      const church = await prisma.church.create({
+        data: {
+          name: "Gatherwise Demo Church",
+          description: "A demonstration church for the Gatherwise platform",
+          address: "123 Main Street, Demo City, ST 12345",
+          phone: "(555) 123-4567",
+          email: "info@gatherwisedemo.org",
+          website: "https://gatherwisedemo.org",
+          members: {
+            create: {
+              userId: existingAdmin.id,
+              role: "ADMIN",
+            },
+          },
+        },
+      });
+
+      console.log("Created church:", church.name);
+
+      const campuses = await prisma.campus.createMany({
+        data: [
+          {
+            name: "Main Campus",
+            description: "Our original location in downtown",
+            address: "123 Main St, Demo City, ST 12345",
+            phone: "(555) 123-4567",
+            email: "main@gatherwisedemo.org",
+            isActive: true,
+            churchId: church.id,
+          },
+          {
+            name: "North Campus",
+            description: "Serving the north side of the city",
+            address: "456 North Ave, Demo City, ST 12345",
+            phone: "(555) 234-5678",
+            email: "north@gatherwisedemo.org",
+            isActive: true,
+            churchId: church.id,
+          },
+          {
+            name: "Online Campus",
+            description: "Virtual campus for online attendees",
+            address: "Online",
+            phone: null,
+            email: "online@gatherwisedemo.org",
+            isActive: true,
+            churchId: church.id,
+          },
+        ],
+      });
+
+      console.log("Created campuses:", campuses.count);
+    } else {
+      console.log("Church and campuses already exist");
+    }
 
     console.log("Updated admin user with organization details");
     return;
@@ -43,6 +112,59 @@ async function main() {
 
   console.log("Created admin user:", admin.email);
   console.log("Organization:", admin.organizationName);
+
+  const church = await prisma.church.create({
+    data: {
+      name: "Gatherwise Demo Church",
+      description: "A demonstration church for the Gatherwise platform",
+      address: "123 Main Street, Demo City, ST 12345",
+      phone: "(555) 123-4567",
+      email: "info@gatherwisedemo.org",
+      website: "https://gatherwisedemo.org",
+      members: {
+        create: {
+          userId: admin.id,
+          role: "ADMIN",
+        },
+      },
+    },
+  });
+
+  console.log("Created church:", church.name);
+
+  const campuses = await prisma.campus.createMany({
+    data: [
+      {
+        name: "Main Campus",
+        description: "Our original location in downtown",
+        address: "123 Main St, Demo City, ST 12345",
+        phone: "(555) 123-4567",
+        email: "main@gatherwisedemo.org",
+        isActive: true,
+        churchId: church.id,
+      },
+      {
+        name: "North Campus",
+        description: "Serving the north side of the city",
+        address: "456 North Ave, Demo City, ST 12345",
+        phone: "(555) 234-5678",
+        email: "north@gatherwisedemo.org",
+        isActive: true,
+        churchId: church.id,
+      },
+      {
+        name: "Online Campus",
+        description: "Virtual campus for online attendees",
+        address: "Online",
+        phone: null,
+        email: "online@gatherwisedemo.org",
+        isActive: true,
+        churchId: church.id,
+      },
+    ],
+  });
+
+  console.log("Created campuses:", campuses.count);
 }
 
 main()

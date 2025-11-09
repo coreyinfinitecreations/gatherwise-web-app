@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, ChevronDown, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,39 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-// Lightweight local fallback for Campus context — replace with your real context implementation if available
-type Campus = {
-  id: string;
-  name: string;
-  description?: string | null;
-};
-
-function useCampus() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [availableCampuses, setAvailableCampuses] = useState<Campus[]>([]);
-  const [currentCampus, setCurrentCampus] = useState<Campus | undefined>(
-    undefined
-  );
-
-  useEffect(() => {
-    // Initialize with a default campus; replace this with real data fetching or context logic.
-    const defaultCampuses: Campus[] = [
-      { id: "main", name: "Main Campus", description: undefined },
-    ];
-    setAvailableCampuses(defaultCampuses);
-    setCurrentCampus(defaultCampuses[0]);
-    setIsLoading(false);
-  }, []);
-
-  const switchCampus = (id: string) => {
-    const campus = availableCampuses.find((c) => c.id === id);
-    if (campus) {
-      setCurrentCampus(campus);
-    }
-  };
-
-  return { currentCampus, availableCampuses, switchCampus, isLoading };
-}
+import { useCampus, Campus } from "@/contexts/campus-context";
 import { cn } from "@/lib/utils";
 
 export function CampusSelector() {
@@ -108,14 +76,17 @@ export function CampusSelector() {
                     switchCampus(campus.id);
                     setOpen(false);
                   }}
+                  className="group"
                 >
                   <div className="flex w-full items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
+                      <MapPin className="h-4 w-4 group-hover:text-white" />
                       <div>
-                        <div className="font-medium">{campus.name}</div>
+                        <div className="font-medium group-hover:text-white">
+                          {campus.name}
+                        </div>
                         {campus.description && (
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-muted-foreground group-hover:text-white/80">
                             {campus.description}
                           </div>
                         )}
@@ -123,7 +94,7 @@ export function CampusSelector() {
                     </div>
                     <Check
                       className={cn(
-                        "h-4 w-4",
+                        "h-4 w-4 group-hover:text-white",
                         currentCampus?.id === campus.id
                           ? "opacity-100"
                           : "opacity-0"
