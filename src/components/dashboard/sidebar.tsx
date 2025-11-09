@@ -127,9 +127,7 @@ export function DashboardSidebar() {
           </div>
           <div>
             <h2 className="text-lg font-semibold">Gatherwise</h2>
-            <p className="text-xs text-muted-foreground">
-              {organizationName}
-            </p>
+            <p className="text-xs text-muted-foreground">{organizationName}</p>
           </div>
         </div>
       </SidebarHeader>
