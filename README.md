@@ -87,6 +87,47 @@ white: #FFFFFF (Pure White)
 - `npm run lint` - Run ESLint
 - `npx prisma studio` - Open database browser
 
+## Test Registration
+
+For development purposes, the app includes a test registration utility at `/test/register`.
+
+### How to Use
+
+1. Start the development server (optionally on port 3001):
+
+   ```bash
+   npm run dev -- --port 3001
+   ```
+
+2. Visit http://localhost:3001/test/register
+
+3. Fill in the form:
+
+   - **Admin Email**: Your test admin email
+   - **Password**: Minimum 8 characters
+   - **Organization Name**: Your test church name
+
+4. Submit the form
+
+5. A new admin user will be created and you'll be automatically logged in and redirected to the dashboard
+
+### What It Does
+
+- Creates a new user with admin role using `UserManager.createUser()`
+- Stores the user in the in-memory mock users array
+- Sets authentication cookie and localStorage
+- Redirects to `/dashboard` as an authenticated admin
+
+### Manual Login
+
+After creating an account via the test registration, you can also log in manually:
+
+1. Visit http://localhost:3001/login
+2. Enter the email and password you used during registration
+3. Submit and you'll be logged in
+
+> **Note:** This test utility is for development only and should be removed or protected before production deployment.
+
 ## License
 
 © 2024 Gatherwise. Building stronger church communities.

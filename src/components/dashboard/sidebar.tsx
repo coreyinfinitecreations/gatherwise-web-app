@@ -33,6 +33,7 @@ import {
 import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/auth-context";
 
 const navigation = [
   {
@@ -106,6 +107,8 @@ const navigation = [
 
 export function DashboardSidebar() {
   const [openItems, setOpenItems] = useState<string[]>([]);
+  const { user } = useAuth();
+  const organizationName = user?.organizationName || "Your Organization";
 
   const toggleItem = (title: string) => {
     setOpenItems((prev) =>
@@ -125,7 +128,7 @@ export function DashboardSidebar() {
           <div>
             <h2 className="text-lg font-semibold">Gatherwise</h2>
             <p className="text-xs text-muted-foreground">
-              Grace Community Church
+              {organizationName}
             </p>
           </div>
         </div>
@@ -181,9 +184,7 @@ export function DashboardSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarSeparator />
-
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 border-t">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>

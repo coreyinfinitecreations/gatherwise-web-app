@@ -46,12 +46,12 @@
 :root {
   --radius: 0.625rem;
 
-  /* Gatherwise Brand Colors */
-  --gw-primary: #fe7743; /* Orange button color */
-  --gw-secondary: #0c7489; /* Dark teal */
-  --gw-tertiary: #13505b; /* Darker teal */
-  --gw-dark: #273f4f; /* Dark blue-gray background */
-  --gw-light: #d7d9ce; /* Light gray/cream */
+  /* Gatherwise Brand Colors - Updated to match landing page */
+  --gw-primary: #6366f1; /* Purple primary from landing page */
+  --gw-secondary: #4f46e5; /* Darker purple */
+  --gw-tertiary: #8b5cf6; /* Light purple accent */
+  --gw-dark: #111827; /* Dark gray text */
+  --gw-light: #f8fafc; /* Light gray background */
   --gw-white: #ffffff; /* Pure white */
 
   /* Shadcn/UI Color Mappings */
@@ -130,4 +130,35 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Landing page button styles */
+.btn-hover-lift {
+  position: relative;
+  background: #6366f1;
+  transition: all 0.2s ease-in-out;
+  transform: translateY(0);
+  box-shadow: 0 2px 8px 0 rgba(99, 102, 241, 0.2);
+}
+
+.btn-hover-lift:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px 0 rgba(99, 102, 241, 0.3);
+}
+
+/* Clean card styles */
+.feature-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover {
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: #6366f1;
 }

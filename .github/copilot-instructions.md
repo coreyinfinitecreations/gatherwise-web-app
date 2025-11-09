@@ -22,12 +22,12 @@ Building a comprehensive church management web application with:
 ## Color Palette
 
 ```css
-primary: #FE7743 (orange button color)
-secondary: #0C7489 (dark teal)
-tertiary: #13505B (darker teal)
-dark: #273F4F (dark blue-gray background)
-light: #D7D9CE (light gray/cream)
-white: #FFFFFF (pure white)
+primary: #6366f1 (purple primary - matches landing page)
+secondary: #4f46e5 (darker purple)
+tertiary: #8b5cf6 (light purple accent)
+dark: #111827 (dark gray text)
+light: #f8fafc (light gray background)
+white: #ffffff (pure white)
 ```
 
 ## Development Guidelines
@@ -38,6 +38,8 @@ white: #FFFFFF (pure white)
 - Use server actions for forms
 - Maintain consistent component structure
 - Follow accessibility best practices
+- **Do NOT add comments in the code** - Write self-documenting code with clear variable and function names
+- **Do NOT create README files** - Only update existing documentation when specifically requested
 
 ## Project Structure
 
@@ -50,9 +52,10 @@ white: #FFFFFF (pure white)
 ## Key Features Implemented
 
 ✅ Project scaffolding with Next.js 14
-✅ Custom color palette integration
+✅ Custom purple color palette (matches landing page)
 ✅ shadcn/ui component library
 ✅ Prisma database schema for church management
+✅ Multi-campus architecture with campus selector
 ✅ Environment configuration
 ✅ Development task setup
 

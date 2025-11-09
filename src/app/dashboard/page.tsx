@@ -1,3 +1,6 @@
+"use client";
+
+import { useAuth } from "@/contexts/auth-context";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import {
   Card,
@@ -129,6 +132,9 @@ const pathwayProgress = [
 ];
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const organizationName = user?.organizationName || "Your Organization";
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -136,8 +142,8 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back! Here&apos;s what&apos;s happening at Grace Community
-            Church.
+            Welcome back! Here&apos;s what&apos;s happening at{" "}
+            {organizationName}.
           </p>
         </div>
 

@@ -13,10 +13,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Search, Settings, User, LogOut, Plus } from "lucide-react";
+import {
+  Bell,
+  Search,
+  Settings,
+  User,
+  LogOut,
+  Plus,
+  Shield,
+} from "lucide-react";
 import { CampusSelector } from "@/components/campus/campus-selector";
+import { useAuth } from "@/contexts/auth-context";
 
 export function DashboardHeader() {
+  const { user, logout } = useAuth();
+
   return (
     <header className="flex h-16 items-center justify-between border-b bg-background px-6 w-full">
       {/* Left side */}
@@ -105,10 +116,16 @@ export function DashboardHeader() {
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Pastor John</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  pastor@gracechurch.com
+                <p className="text-sm font-medium leading-none">
+                  {user?.name || "User"}
                 </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.email || "user@church.org"}
+                </p>
+                <div className="flex items-center gap-1 mt-1">
+                  <Shield className="h-3 w-3 text-green-600" />
+                  <span className="text-xs text-green-600">Secure Session</span>
+                </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -121,9 +138,9 @@ export function DashboardHeader() {
               <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout} className="text-red-600">
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+              <span>Sign Out Securely</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
