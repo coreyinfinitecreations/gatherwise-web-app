@@ -42,11 +42,12 @@ const { filterByCampus, getFilterParams } = useCampusFilter({
   - Prisma client singleton: import from `src/lib/prisma.ts` (re-uses globalThis in dev). Use this file for all DB access to avoid multiple PrismaClient instances.
   - Passkeys/webauthn: implemented via `src/lib/auth/passkey-manager.ts` and API routes under `src/app/api/auth/passkeys`. The repo uses `@simplewebauthn/*` packages; follow how `PasskeyManager` is used by `UserManager`.
 
-  Code & UI layout conventions
-  - Components live under `src/components/*`. UI primitives live in `src/components/ui/*` (shadcn-like patterns). Dashboard pages are under `src/app/dashboard/*`.
-  - Server actions and server components: pages under `src/app` often call server-side libraries (Prisma) via API routes or server components — prefer using existing API routes unless you intentionally run DB calls in server components.
-
-  Practical examples to follow
+Code & UI layout conventions
+- Components live under `src/components/*`. UI primitives live in `src/components/ui/*` (shadcn-like patterns). Dashboard pages are under `src/app/dashboard/*`.
+- Server actions and server components: pages under `src/app` often call server-side libraries (Prisma) via API routes or server components — prefer using existing API routes unless you intentionally run DB calls in server components.
+- **NO code comments** — write self-documenting code with descriptive names instead.
+- **Small functions** — keep functions focused on single responsibilities, break down complex logic.
+- **Clean files** — minimize imports, group related code, use consistent formatting.  Practical examples to follow
   - To authenticate in a page: call `POST /api/auth/login` (see `src/app/api/auth/login/route.ts`) which uses `UserManager.authenticateUser`.
   - To query DB from server code: import `prisma` from `src/lib/prisma.ts` (avoid `new PrismaClient()` elsewhere).
   - To create seed data: inspect `prisma/seed.ts` — it creates an admin user and demo church/campuses.
