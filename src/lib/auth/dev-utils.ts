@@ -1,4 +1,5 @@
 import { UserManager, type User } from "./user-manager";
+import { prisma } from "@/lib/prisma";
 
 // Development utility to create test accounts
 export async function createTestAccounts() {
@@ -7,25 +8,28 @@ export async function createTestAccounts() {
       email: "member@gatherwise.com",
       password: "Password123!",
       name: "John Member",
-      role: "member" as const,
+      role: "MEMBER" as const,
     },
     {
       email: "youth.pastor@gatherwise.com",
       password: "Password123!",
       name: "Sarah Youth Pastor",
-      role: "pastor" as const,
+      role: "PASTOR" as const,
     },
     {
       email: "finance@gatherwise.com",
       password: "Password123!",
       name: "Mike Finance",
-      role: "staff" as const,
+      role: "LEADER" as const,
     },
   ];
 
   for (const account of testAccounts) {
     try {
-      const existingUser = UserManager.getUserByEmail(account.email);
+      const existingUser = await prisma.user.findUnique({
+        where: { email: account.email },
+      });
+
       if (!existingUser) {
         await UserManager.createUser(account);
         console.log(`✅ Created test account: ${account.email}`);
@@ -39,34 +43,69 @@ export async function createTestAccounts() {
 }
 
 // Utility to get all users for debugging
-export function listAllUsers(): User[] {
-  return UserManager.getUsers();
+export async function listAllUsers(): Promise<User[]> {
+  const users = await prisma.user.findMany();
+  return users.map((user) => ({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role as User["role"],
+    campusId: user.campusId,
+    organizationId: user.organizationId,
+    organizationName: user.organizationName,
+    isActive: user.isActive,
+    lastLogin: user.lastLogin,
+    loginAttempts: user.loginAttempts,
+    lockedUntil: user.lockedUntil,
+    createdAt: user.createdAt,
+  }));
 }
 
 // Utility to reset login attempts
-export function resetUserLock(email: string): boolean {
-  const user = UserManager.getUserByEmail(email);
-  if (user) {
-    UserManager.updateUser(user.id, {
-      loginAttempts: 0,
-      lockedUntil: undefined,
+export async function resetUserLock(email: string): Promise<boolean> {
+  try {
+    await prisma.user.update({
+      where: { email },
+      data: {
+        loginAttempts: 0,
+        lockedUntil: null,
+      },
     });
     return true;
+  } catch {
+    return false;
   }
-  return false;
 }
 
 // Security audit utility
-export function getSecurityReport() {
-  const metrics = UserManager.getSecurityMetrics();
-  const recentAttempts = UserManager.getLoginAttempts(undefined, 10);
+export async function getSecurityReport() {
+  const users = await prisma.user.findMany({
+    select: {
+      email: true,
+      loginAttempts: true,
+      lockedUntil: true,
+      lastLogin: true,
+      isActive: true,
+    },
+  });
+
+  const lockedUsers = users.filter(
+    (u) => u.lockedUntil && u.lockedUntil > new Date()
+  ).length;
+  const inactiveUsers = users.filter((u) => !u.isActive).length;
+  const totalUsers = users.length;
 
   return {
-    ...metrics,
-    recentAttempts: recentAttempts.map((attempt) => ({
-      email: attempt.email,
-      timestamp: attempt.timestamp.toISOString(),
-      success: attempt.success,
+    totalUsers,
+    activeUsers: totalUsers - inactiveUsers,
+    inactiveUsers,
+    lockedUsers,
+    users: users.map((u) => ({
+      email: u.email,
+      loginAttempts: u.loginAttempts,
+      isLocked: u.lockedUntil ? u.lockedUntil > new Date() : false,
+      lastLogin: u.lastLogin?.toISOString(),
+      isActive: u.isActive,
     })),
   };
 }
