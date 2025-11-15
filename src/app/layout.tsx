@@ -5,8 +5,10 @@ import "react-toastify/dist/ReactToastify.css";
 import { CampusProvider } from "@/contexts/campus-context";
 import { AuthProvider } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
+import { NotificationProvider } from "@/contexts/notification-context";
 import { QueryProvider } from "@/providers/query-provider";
 import { ToastContainer } from "react-toastify";
+import { NotificationToast } from "@/components/ui/notification-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +38,12 @@ export default function RootLayout({
         <QueryProvider>
           <AuthProvider>
             <ThemeProvider>
-              <CampusProvider>{children}</CampusProvider>
+              <NotificationProvider>
+                <CampusProvider>
+                  {children}
+                  <NotificationToast />
+                </CampusProvider>
+              </NotificationProvider>
               <ToastContainer
                 position="top-right"
                 autoClose={3000}
