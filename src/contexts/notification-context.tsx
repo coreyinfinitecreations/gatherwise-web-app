@@ -81,13 +81,17 @@ export function NotificationProvider({
       if (response.ok) {
         const data = await response.json();
         setNotifications(data.notifications || []);
-        
+
         if (data.notifications && data.notifications.length > 0) {
           const newestId = data.notifications[0].id;
-          
-          if (lastNotificationIdRef.current && lastNotificationIdRef.current !== newestId) {
-            const storedMuted = localStorage.getItem("notificationsMuted") === "true";
-            
+
+          if (
+            lastNotificationIdRef.current &&
+            lastNotificationIdRef.current !== newestId
+          ) {
+            const storedMuted =
+              localStorage.getItem("notificationsMuted") === "true";
+
             if (!storedMuted) {
               const newNotification = data.notifications[0];
               const toastEvent = new CustomEvent("showNotificationToast", {
@@ -102,7 +106,7 @@ export function NotificationProvider({
               window.dispatchEvent(toastEvent);
             }
           }
-          
+
           lastNotificationIdRef.current = newestId;
         }
       }
@@ -201,14 +205,14 @@ export function NotificationProvider({
 
   const startPolling = useCallback(() => {
     if (pollingIntervalRef.current) return;
-    
+
     console.log("Starting notification polling (every 10 seconds)");
     setConnectionStatus("connected");
-    
+
     pollingIntervalRef.current = setInterval(() => {
       fetchNotifications();
     }, 10000);
-    
+
     fetchNotifications();
   }, [fetchNotifications]);
 
