@@ -51,7 +51,7 @@ export function CampusSelector() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-[200px] justify-between text-foreground"
         >
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
@@ -76,13 +76,13 @@ export function CampusSelector() {
                     switchCampus(campus.id);
                     setOpen(false);
                   }}
-                  className="group"
+                  className="group aria-selected:bg-accent/0 data-[selected=true]:bg-accent/0 hover:!bg-primary hover:!text-white"
                 >
                   <div className="flex w-full items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 group-hover:text-white" />
+                      <MapPin className="h-4 w-4 text-foreground group-hover:text-white" />
                       <div>
-                        <div className="font-medium group-hover:text-white">
+                        <div className="font-medium text-foreground group-hover:text-white">
                           {campus.name}
                         </div>
                         {campus.description && (
@@ -94,7 +94,7 @@ export function CampusSelector() {
                     </div>
                     <Check
                       className={cn(
-                        "h-4 w-4 group-hover:text-white",
+                        "h-4 w-4 text-foreground group-hover:text-white",
                         currentCampus?.id === campus.id
                           ? "opacity-100"
                           : "opacity-0"

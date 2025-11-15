@@ -191,9 +191,21 @@ export class UserManager {
     }
 
     let organizationId = userData.organizationId;
+    let shouldCreateChurch = false;
 
     if (!organizationId) {
       organizationId = await this.generateUniqueOrganizationId();
+      shouldCreateChurch = true;
+    }
+
+    if (shouldCreateChurch) {
+      await prisma.church.create({
+        data: {
+          id: organizationId,
+          name: userData.organizationName || `${userData.name}'s Church`,
+          description: "Church organization",
+        },
+      });
     }
 
     const passwordHash = await bcrypt.hash(userData.password, 12);

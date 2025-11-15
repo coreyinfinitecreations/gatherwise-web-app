@@ -6,6 +6,17 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...");
 
+  await prisma.church.upsert({
+    where: { id: "GW-2025-CQOHMKNYC" },
+    update: {},
+    create: {
+      id: "GW-2025-CQOHMKNYC",
+      name: "Gatherwise Church",
+      description: "Main church organization",
+    },
+  });
+  console.log("✅ Church GW-2025-CQOHMKNYC created/verified");
+
   const adminEmail = "admin@gatherwise.com";
   const existingAdmin = await prisma.user.findUnique({
     where: { email: adminEmail },

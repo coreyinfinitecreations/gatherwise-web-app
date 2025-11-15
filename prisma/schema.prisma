@@ -51,6 +51,10 @@ model User {
   city                String?
   state               String?
   zipCode             String?
+  birthday            DateTime?
+  maritalStatus       String?
+  anniversary         DateTime?
+  themePreference     String?              @default("light")
   isActive            Boolean              @default(true)
   loginAttempts       Int                  @default(0)
   lockedUntil         DateTime?
@@ -63,6 +67,7 @@ model User {
   memberProgress      PathwayProgress[]
   lifeGroups          LifeGroupMember[]
   eventRegistrations  EventRegistration[]
+  notifications       Notification[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 }
@@ -89,6 +94,7 @@ model Church {
   campuses                Campus[]
   lifeGroups              LifeGroup[]
   events                  Event[]
+  customRoles             CustomRole[]
   createdAt               DateTime       @default(now())
   updatedAt               DateTime       @updatedAt
 }
@@ -267,4 +273,58 @@ enum RegistrationStatus {
   WAITLISTED
   CANCELLED
   ATTENDED
+}
+
+model CustomRole {
+  id          String             @id @default(cuid())
+  name        String
+  description String?
+  churchId    String
+  church      Church             @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  permissions RolePermission[]
+  isSystemRole Boolean           @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@unique([name, churchId])
+}
+
+model RolePermission {
+  id         String     @id @default(cuid())
+  roleId     String
+  role       CustomRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  resource   String
+  canRead    Boolean    @default(false)
+  canCreate  Boolean    @default(false)
+  canUpdate  Boolean    @default(false)
+  canDelete  Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([roleId, resource])
+}
+
+model Notification {
+  id        String             @id @default(cuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  read      Boolean            @default(false)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  SYSTEM
+  EVENT
+  MEMBER
+  LIFE_GROUP
+  PATHWAY
+  ANNOUNCEMENT
 }

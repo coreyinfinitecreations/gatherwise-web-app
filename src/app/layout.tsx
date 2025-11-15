@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import { CampusProvider } from "@/contexts/campus-context";
 import { AuthProvider } from "@/contexts/auth-context";
+import { ThemeProvider } from "@/contexts/theme-context";
+import { NotificationProvider } from "@/contexts/notification-context";
 import { QueryProvider } from "@/providers/query-provider";
+import { ToastContainer } from "react-toastify";
+import { NotificationToast } from "@/components/ui/notification-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,13 +31,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
           <AuthProvider>
-            <CampusProvider>{children}</CampusProvider>
+            <ThemeProvider>
+              <NotificationProvider>
+                <CampusProvider>
+                  {children}
+                  <NotificationToast />
+                </CampusProvider>
+              </NotificationProvider>
+              <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+              />
+            </ThemeProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

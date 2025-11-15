@@ -15,21 +15,44 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   Bell,
+  BellOff,
   Search,
   Settings,
   User,
   LogOut,
   Plus,
   Shield,
+  Moon,
+  Sun,
+  Check,
+  Trash2,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { CampusSelector } from "@/components/campus/campus-selector";
 import { useAuth } from "@/contexts/auth-context";
+import { useTheme } from "@/contexts/theme-context";
+import { useNotifications } from "@/contexts/notification-context";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { formatDistanceToNow } from "date-fns";
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const {
+    notifications,
+    unreadCount,
+    isConnected,
+    connectionStatus,
+    isMuted,
+    toggleMute,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+  } = useNotifications();
   const [hasMultipleCampuses, setHasMultipleCampuses] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserSettings = async () => {
@@ -52,6 +75,34 @@ export function DashboardHeader() {
     };
 
     fetchUserSettings();
+  }, [user?.id]);
+
+  // Load profile image from localStorage
+  useEffect(() => {
+    if (user?.id) {
+      const storedImage = localStorage.getItem(`profileImage_${user.id}`);
+      setProfileImage(storedImage);
+    }
+  }, [user?.id]);
+
+  // Listen for profile image changes
+  useEffect(() => {
+    const handleProfileImageChange = (event: CustomEvent) => {
+      if (event.detail.userId === user?.id) {
+        setProfileImage(event.detail.image);
+      }
+    };
+
+    window.addEventListener(
+      "profileImageChanged",
+      handleProfileImageChange as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "profileImageChanged",
+        handleProfileImageChange as EventListener
+      );
+    };
   }, [user?.id]);
 
   const getInitials = (name: string) => {
@@ -86,6 +137,23 @@ export function DashboardHeader() {
 
       {/* Right side */}
       <div className="flex items-center gap-4">
+        {/* Theme Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          className="h-9 w-9"
+          title={
+            theme === "light" ? "Switch to dark mode" : "Switch to light mode"
+          }
+        >
+          {theme === "light" ? (
+            <Moon className="h-4 w-4" />
+          ) : (
+            <Sun className="h-4 w-4" />
+          )}
+        </Button>
+
         {/* Quick Actions */}
         <Button size="sm" className="gap-2">
           <Plus className="h-4 w-4" />
@@ -93,48 +161,161 @@ export function DashboardHeader() {
         </Button>
 
         {/* Notifications */}
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-4 w-4" />
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs"
-              >
-                3
-              </Badge>
+              {isMuted ? (
+                <BellOff className="h-4 w-4" />
+              ) : (
+                <Bell className="h-4 w-4" />
+              )}
+              {unreadCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center bg-primary hover:bg-primary text-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </Badge>
+              )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-96">
+            <div className="flex items-center justify-between px-4 py-2">
+              <div className="flex items-center gap-2">
+                <DropdownMenuLabel className="p-0">
+                  Notifications
+                </DropdownMenuLabel>
+                <div
+                  className={`h-2 w-2 rounded-full ${
+                    connectionStatus === "connected"
+                      ? "bg-green-500"
+                      : connectionStatus === "connecting"
+                      ? "bg-yellow-500"
+                      : "bg-red-500"
+                  }`}
+                  title={
+                    connectionStatus === "connected"
+                      ? "Connected"
+                      : connectionStatus === "connecting"
+                      ? "Connecting..."
+                      : "Disconnected"
+                  }
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleMute();
+                  }}
+                  className="h-7 text-xs"
+                  title={
+                    isMuted ? "Unmute notifications" : "Mute notifications"
+                  }
+                >
+                  {isMuted ? (
+                    <>
+                      <BellOff className="h-3 w-3 mr-1" />
+                      Muted
+                    </>
+                  ) : (
+                    <>
+                      <Bell className="h-3 w-3 mr-1" />
+                      Mute
+                    </>
+                  )}
+                </Button>
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      markAllAsRead();
+                    }}
+                    className="h-7 text-xs"
+                  >
+                    Mark all read
+                  </Button>
+                )}
+              </div>
+            </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start p-4">
-              <div className="font-medium">New member joined</div>
-              <div className="text-sm text-muted-foreground">
-                Sarah Johnson completed the visitor pathway
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                2 hours ago
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start p-4">
-              <div className="font-medium">Pathway milestone reached</div>
-              <div className="text-sm text-muted-foreground">
-                5 members completed &quot;Foundations of Faith&quot;
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                1 day ago
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start p-4">
-              <div className="font-medium">Life group update needed</div>
-              <div className="text-sm text-muted-foreground">
-                Young Adults group requires attendance update
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                2 days ago
-              </div>
-            </DropdownMenuItem>
+            <div className="max-h-[400px] overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                  <Bell className="h-8 w-8 mb-2 opacity-50" />
+                  <p className="text-sm">No notifications</p>
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className={`flex flex-col items-start p-4 cursor-pointer ${
+                      !notification.read ? "bg-muted/50" : ""
+                    }`}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      if (!notification.read) {
+                        markAsRead(notification.id);
+                      }
+                      if (notification.link) {
+                        window.location.href = notification.link;
+                      }
+                    }}
+                  >
+                    <div className="flex items-start justify-between w-full gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium truncate">
+                            {notification.title}
+                          </div>
+                          {!notification.read && (
+                            <div className="h-2 w-2 rounded-full bg-blue-600 flex-shrink-0" />
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {notification.message}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {formatDistanceToNow(
+                            new Date(notification.createdAt),
+                            {
+                              addSuffix: true,
+                            }
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {!notification.read && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(notification.id);
+                            }}
+                          >
+                            <Check className="h-3 w-3" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 hover:bg-destructive/10 hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(notification.id);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -143,13 +324,13 @@ export function DashboardHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10">
-                <AvatarImage
-                  src="/avatars/pastor-john.jpg"
-                  alt={user?.name || "User"}
-                />
-                <AvatarFallback className="bg-primary text-white">
-                  {user?.name ? getInitials(user.name) : "U"}
-                </AvatarFallback>
+                {profileImage ? (
+                  <AvatarImage src={profileImage} alt={user?.name || "User"} />
+                ) : (
+                  <AvatarFallback className="bg-primary dark:bg-[#312e81] text-white">
+                    {user?.name ? getInitials(user.name) : "U"}
+                  </AvatarFallback>
+                )}
               </Avatar>
             </Button>
           </DropdownMenuTrigger>

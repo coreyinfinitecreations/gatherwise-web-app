@@ -94,33 +94,33 @@
 }
 
 .dark {
-  --background: var(--gw-dark);
-  --foreground: var(--gw-white);
-  --card: var(--gw-tertiary);
-  --card-foreground: var(--gw-white);
-  --popover: var(--gw-tertiary);
-  --popover-foreground: var(--gw-white);
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
   --primary: var(--gw-primary);
   --primary-foreground: var(--gw-white);
-  --secondary: var(--gw-secondary);
-  --secondary-foreground: var(--gw-white);
-  --muted: var(--gw-tertiary);
-  --muted-foreground: var(--gw-light);
+  --secondary: #334155;
+  --secondary-foreground: #f1f5f9;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
   --accent: var(--gw-secondary);
   --accent-foreground: var(--gw-white);
-  --destructive: #dc2626;
+  --destructive: #ef4444;
   --destructive-foreground: var(--gw-white);
-  --border: var(--gw-secondary);
-  --input: var(--gw-tertiary);
+  --border: #334155;
+  --input: #1e293b;
   --ring: var(--gw-primary);
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: #3730a3;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: var(--gw-primary);
+  --sidebar-primary-foreground: var(--gw-white);
+  --sidebar-accent: #4338ca;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #4338ca;
+  --sidebar-ring: var(--gw-primary);
 }
 
 @layer base {
@@ -164,4 +164,43 @@
   box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
   border-color: #6366f1;
+}
+
+.Toastify__toast-container {
+  z-index: 9999;
+}
+
+.Toastify__toast {
+  font-family: var(--font-geist-sans);
+  border-radius: 0.625rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dark .Toastify__toast {
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+}
+
+.dark .Toastify__toast--success {
+  background-color: hsl(142, 76%, 36%);
+  color: white;
+}
+
+.dark .Toastify__toast--error {
+  background-color: hsl(0, 84%, 60%);
+  color: white;
+}
+
+.dark .Toastify__toast--info {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.dark .Toastify__toast--warning {
+  background-color: hsl(38, 92%, 50%);
+  color: white;
+}
+
+.dark .Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.7);
 }

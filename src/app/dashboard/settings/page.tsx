@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
+import { toast } from "react-toastify";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -37,10 +39,21 @@ import { PasskeyRegistration } from "@/components/auth/passkey-login";
 import { useAuth } from "@/contexts/auth-context";
 import { useQueryClient } from "@tanstack/react-query";
 
-export default function SettingsPage() {
+/**
+ * SettingsPageContent
+ *
+ * This component contains the full interactive client-side settings UI.
+ * It uses useSearchParams(), so we render it under a Suspense boundary
+ * in the default export below to satisfy Next.js prerender rules.
+ */
+function SettingsPageContent() {
   const { user, updateUser } = useAuth();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [passkeys, setPasskeys] = useState<PasskeyCredential[]>([]);
+  const [churchId, setChurchId] = useState<string>("");
   const [capabilities, setCapabilities] = useState({
     isSupported: false,
     isPlatformAuthenticatorAvailable: false,
@@ -53,29 +66,62 @@ export default function SettingsPage() {
   const [isEditingOrg, setIsEditingOrg] = useState(false);
   const [isSavingOrg, setIsSavingOrg] = useState(false);
 
+  // useSearchParams is used here — this value will be read once Suspense resolves.
+  const currentTab = searchParams?.get?.("tab") || "security";
+
   useEffect(() => {
     loadSecurityData();
     if (user?.organizationName) {
       setOrganizationName(user.organizationName);
     }
+    if (user?.id) {
+      fetchChurchId();
+    }
+    // Intentionally only depend on user
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  const fetchChurchId = async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await fetch("/api/churches", {
+        headers: {
+          "x-user-id": user.id,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.churches && data.churches.length > 0) {
+          setChurchId(data.churches[0].id);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching church ID:", err);
+    }
+  };
 
   const loadSecurityData = async () => {
     try {
       setIsLoading(true);
 
-      // Get WebAuthn capabilities
+      // Get WebAuthn capabilities (may be async)
       const caps = await PasskeyManager.getCapabilities();
       setCapabilities(caps);
 
-      // Get user's passkeys
+      // Get user's passkeys (some implementations return a Promise)
       if (user?.email) {
-        const userPasskeys = PasskeyManager.getUserPasskeys(user.email);
-        setPasskeys(userPasskeys);
+        const userPasskeys =
+          typeof PasskeyManager.getUserPasskeys === "function"
+            ? await PasskeyManager.getUserPasskeys(user.email)
+            : [];
+        setPasskeys(userPasskeys || []);
       }
-    } catch (error) {
-      console.error("Error loading security data:", error);
+    } catch (err) {
+      console.error("Error loading security data:", err);
       setError("Failed to load security settings");
+      // Keep a visible toast as well (optional)
+      // toast.error("Failed to load security settings");
     } finally {
       setIsLoading(false);
     }
@@ -83,24 +129,21 @@ export default function SettingsPage() {
 
   const handlePasskeyRegistrationSuccess = () => {
     setSuccess("Biometric authentication has been set up successfully!");
-
-    // Mark that real passkeys have been registered
     localStorage.setItem("hasRegisteredPasskeys", "true");
-
     loadSecurityData(); // Refresh the passkey list
     setTimeout(() => setSuccess(""), 5000);
   };
 
-  const handlePasskeyRegistrationError = (error: string) => {
-    setError(error);
+  const handlePasskeyRegistrationError = (errMsg: string) => {
+    setError(errMsg);
     setTimeout(() => setError(""), 5000);
   };
 
   const handleRemovePasskey = (credentialId: string) => {
     if (!user?.email) return;
 
-    const success = PasskeyManager.removePasskey(user.email, credentialId);
-    if (success) {
+    const ok = PasskeyManager.removePasskey(user.email, credentialId);
+    if (ok) {
       setSuccess("Passkey removed successfully");
       loadSecurityData();
       setTimeout(() => setSuccess(""), 3000);
@@ -148,7 +191,6 @@ export default function SettingsPage() {
 
       const data = await response.json();
 
-      // Update the user in auth context
       if (user && data.user) {
         updateUser({
           ...user,
@@ -156,14 +198,12 @@ export default function SettingsPage() {
         });
       }
 
-      // Invalidate all queries that might display the organization name
       queryClient.invalidateQueries();
-
       setSuccess("Organization name updated successfully");
       setIsEditingOrg(false);
       setTimeout(() => setSuccess(""), 3000);
-    } catch (error) {
-      console.error("Error updating organization name:", error);
+    } catch (err) {
+      console.error("Error updating organization name:", err);
       setError("Failed to update organization name");
       setTimeout(() => setError(""), 3000);
     } finally {
@@ -183,7 +223,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
         </div>
       </DashboardLayout>
@@ -217,7 +257,19 @@ export default function SettingsPage() {
         )}
 
         {/* Tabs */}
-        <Tabs defaultValue="security" className="space-y-6">
+        <Tabs
+          value={currentTab}
+          className="space-y-6"
+          onValueChange={(value) => {
+            if (value === "team") {
+              router.push("/dashboard/settings/roles");
+            } else if (value === "organization") {
+              router.push("/dashboard/settings/organization");
+            } else if (value === "security") {
+              router.push("/dashboard/settings");
+            }
+          }}
+        >
           <TabsList>
             <TabsTrigger value="security" className="gap-2">
               <Shield className="h-4 w-4" />
@@ -235,7 +287,6 @@ export default function SettingsPage() {
 
           {/* Security Tab */}
           <TabsContent value="security" className="space-y-6">
-            {/* Security Overview */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -334,34 +385,51 @@ export default function SettingsPage() {
 
                   {passkeys.length > 0 ? (
                     <div className="space-y-3">
-                      {passkeys.map((passkey) => (
-                        <div
-                          key={passkey.id}
-                          className="flex items-center justify-between p-3 border rounded-lg"
-                        >
-                          <div className="flex items-center gap-3">
-                            {getDeviceIcon(passkey.deviceName)}
-                            <div>
-                              <div className="font-medium">
-                                {passkey.deviceName || "Unknown Device"}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                Added {passkey.createdAt.toLocaleDateString()}
-                                {passkey.lastUsed &&
-                                  ` • Last used ${passkey.lastUsed.toLocaleDateString()}`}
+                      {passkeys.map((passkey) => {
+                        // passkey.createdAt / lastUsed might be strings — coerce safely
+                        const createdAt =
+                          passkey.createdAt instanceof Date
+                            ? passkey.createdAt
+                            : new Date(passkey.createdAt || "");
+                        const lastUsed =
+                          passkey.lastUsed instanceof Date
+                            ? passkey.lastUsed
+                            : passkey.lastUsed
+                            ? new Date(passkey.lastUsed)
+                            : null;
+
+                        return (
+                          <div
+                            key={passkey.id}
+                            className="flex items-center justify-between p-3 border rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              {getDeviceIcon(passkey.deviceName)}
+                              <div>
+                                <div className="font-medium">
+                                  {passkey.deviceName || "Unknown Device"}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {isNaN(createdAt.getTime())
+                                    ? "Added: unknown"
+                                    : `Added ${createdAt.toLocaleDateString()}`}
+                                  {lastUsed &&
+                                    !isNaN(lastUsed.getTime()) &&
+                                    ` • Last used ${lastUsed.toLocaleDateString()}`}
+                                </div>
                               </div>
                             </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemovePasskey(passkey.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemovePasskey(passkey.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <Alert>
@@ -552,33 +620,37 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* Team & Roles Tab */}
-          <TabsContent value="team" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Team Members
-                </CardTitle>
-                <CardDescription>
-                  Manage team members and their roles
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    Team and role management features will be available here.
-                    Invite team members and assign roles like Admin, Pastor,
-                    Leader, etc.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
+  );
+}
+
+/**
+ * Default export: wrap the client content in Suspense to avoid
+ * `useSearchParams()` prerender errors when Next.js attempts to pre-render.
+ */
+export default function SettingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <DashboardLayout>
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+              <p className="text-muted-foreground">
+                Manage your account, security, and organization settings
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+          </div>
+        </DashboardLayout>
+      }
+    >
+      <SettingsPageContent />
+    </Suspense>
   );
 }
