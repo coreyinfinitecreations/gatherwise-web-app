@@ -244,7 +244,7 @@ function LoginPageContent() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-r from-blue-950 via-blue-900 via-30% via-purple-600 via-45% via-blue-900 via-60% to-indigo-950 animated-gradient flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center">
@@ -253,7 +253,7 @@ function LoginPageContent() {
               <Shield className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Gatherwise Login</h1>
+          <h1 className="text-2xl font-bold text-white">Gatherwise Login</h1>
         </div>
         {/* Conditional Passkey Login - Only shows if passkeys are available */}
         <ConditionalPasskeyLogin

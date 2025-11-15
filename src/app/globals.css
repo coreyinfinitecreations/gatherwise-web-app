@@ -204,3 +204,26 @@
 .dark .Toastify__progress-bar {
   background: rgba(255, 255, 255, 0.7);
 }
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 30% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 70% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-gradient {
+  background-size: 400% 200%;
+  animation: gradient-shift 20s ease-in-out infinite;
+}

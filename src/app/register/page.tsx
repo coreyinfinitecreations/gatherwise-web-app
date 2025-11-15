@@ -217,7 +217,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-950 via-blue-900 via-30% via-purple-600 via-45% via-blue-900 via-60% to-indigo-950 animated-gradient p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle className="text-2xl">
