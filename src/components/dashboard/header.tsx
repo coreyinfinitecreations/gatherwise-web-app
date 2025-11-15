@@ -21,14 +21,18 @@ import {
   LogOut,
   Plus,
   Shield,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { CampusSelector } from "@/components/campus/campus-selector";
 import { useAuth } from "@/contexts/auth-context";
+import { useTheme } from "@/contexts/theme-context";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [hasMultipleCampuses, setHasMultipleCampuses] = useState(false);
 
   useEffect(() => {
@@ -86,6 +90,23 @@ export function DashboardHeader() {
 
       {/* Right side */}
       <div className="flex items-center gap-4">
+        {/* Theme Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          className="h-9 w-9"
+          title={
+            theme === "light" ? "Switch to dark mode" : "Switch to light mode"
+          }
+        >
+          {theme === "light" ? (
+            <Moon className="h-4 w-4" />
+          ) : (
+            <Sun className="h-4 w-4" />
+          )}
+        </Button>
+
         {/* Quick Actions */}
         <Button size="sm" className="gap-2">
           <Plus className="h-4 w-4" />

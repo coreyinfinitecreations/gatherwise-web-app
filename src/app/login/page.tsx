@@ -40,6 +40,10 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
+
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+  }, []);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
@@ -248,29 +252,12 @@ function LoginPageContent() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Gatherwise Login</h1>
-          <p className="text-sm text-gray-600 mt-2">
-            Enterprise-grade security for your church management
-          </p>
         </div>
-
-        {/* Security Badge */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-blue-800">
-            <Lock className="h-4 w-4" />
-            <span className="text-sm font-medium">Bank-level Security</span>
-          </div>
-          <p className="text-xs text-blue-600 mt-1">
-            256-bit encryption, multi-factor authentication, and advanced threat
-            protection
-          </p>
-        </div>
-
         {/* Conditional Passkey Login - Only shows if passkeys are available */}
         <ConditionalPasskeyLogin
           onSuccess={() => router.replace("/dashboard")}
           onError={(error) => setError(error)}
         />
-
         {/* Login Form */}
         <Card>
           <CardHeader>
@@ -329,7 +316,7 @@ function LoginPageContent() {
                 </div>
               </div>
 
-              {/* Password Security Validation */}
+              {/* Password Security Validation
               {formData.password && (
                 <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
                   <h4 className="text-sm font-medium text-gray-700">
@@ -358,7 +345,7 @@ function LoginPageContent() {
                     />
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Remember Me */}
               <div className="flex items-center space-x-2">
@@ -442,31 +429,7 @@ function LoginPageContent() {
             </Link>
           </CardFooter>
         </Card>
-
-        {/* Security Features */}
-        <div className="bg-white border rounded-lg p-4">
-          <h3 className="font-medium text-gray-900 mb-3">Security Features</h3>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
-              <span className="text-gray-600">SSL Encryption</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
-              <span className="text-gray-600">Multi-Factor Auth</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
-              <span className="text-gray-600">Threat Detection</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
-              <span className="text-gray-600">Session Monitoring</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Demo Credentials */}
+        {/* Demo Credentials
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <h4 className="font-medium text-yellow-800 mb-2">Demo Credentials</h4>
           <div className="text-sm text-yellow-700 space-y-1">
@@ -480,8 +443,8 @@ function LoginPageContent() {
               💡 <strong>Tip:</strong> After logging in, visit Settings to set
               up biometric authentication
             </div>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
       </div>
     </div>
   );

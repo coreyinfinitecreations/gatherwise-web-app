@@ -162,11 +162,11 @@ export function DashboardSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-primary-foreground/10 bg-primary">
+    <Sidebar className="border-r border-primary-foreground/10 bg-primary dark:bg-gradient-to-br dark:from-[#6366f1] dark:to-[#312e81]">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
-            <Church className="h-4 w-4 text-primary" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white dark:bg-primary">
+            <Church className="h-4 w-4 text-primary dark:text-white" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-white">Gatherwise</h2>
