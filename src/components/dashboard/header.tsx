@@ -75,9 +75,15 @@ export function DashboardHeader() {
       }
     };
 
-    window.addEventListener('profileImageChanged', handleProfileImageChange as EventListener);
+    window.addEventListener(
+      "profileImageChanged",
+      handleProfileImageChange as EventListener
+    );
     return () => {
-      window.removeEventListener('profileImageChanged', handleProfileImageChange as EventListener);
+      window.removeEventListener(
+        "profileImageChanged",
+        handleProfileImageChange as EventListener
+      );
     };
   }, [user?.id]);
 
@@ -188,10 +194,7 @@ export function DashboardHeader() {
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10">
                 {profileImage ? (
-                  <AvatarImage
-                    src={profileImage}
-                    alt={user?.name || "User"}
-                  />
+                  <AvatarImage src={profileImage} alt={user?.name || "User"} />
                 ) : (
                   <AvatarFallback className="bg-primary dark:bg-[#312e81] text-white">
                     {user?.name ? getInitials(user.name) : "U"}

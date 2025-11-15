@@ -172,9 +172,11 @@ export default function ProfilePage() {
     if (user?.id) {
       localStorage.setItem(`profileImage_${user.id}`, croppedImage);
       // Dispatch custom event to notify other components
-      window.dispatchEvent(new CustomEvent('profileImageChanged', { 
-        detail: { userId: user.id, image: croppedImage } 
-      }));
+      window.dispatchEvent(
+        new CustomEvent("profileImageChanged", {
+          detail: { userId: user.id, image: croppedImage },
+        })
+      );
     }
     setSuccess("Profile picture updated!");
     setTimeout(() => setSuccess(""), 3000);
@@ -186,9 +188,11 @@ export default function ProfilePage() {
     if (user?.id) {
       localStorage.removeItem(`profileImage_${user.id}`);
       // Dispatch custom event to notify other components
-      window.dispatchEvent(new CustomEvent('profileImageChanged', { 
-        detail: { userId: user.id, image: null } 
-      }));
+      window.dispatchEvent(
+        new CustomEvent("profileImageChanged", {
+          detail: { userId: user.id, image: null },
+        })
+      );
     }
     setSuccess("Profile picture removed");
     setTimeout(() => setSuccess(""), 3000);
