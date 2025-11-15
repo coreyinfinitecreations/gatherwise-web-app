@@ -81,7 +81,12 @@ export default function ProfilePage() {
       formatted = cleaned.slice(0, 2) + "/" + cleaned.slice(2);
     }
     if (cleaned.length >= 4) {
-      formatted = cleaned.slice(0, 2) + "/" + cleaned.slice(2, 4) + "/" + cleaned.slice(4, 8);
+      formatted =
+        cleaned.slice(0, 2) +
+        "/" +
+        cleaned.slice(2, 4) +
+        "/" +
+        cleaned.slice(4, 8);
     }
 
     setter(formatted);
@@ -93,8 +98,15 @@ export default function ProfilePage() {
       const month = parseInt(parts[0], 10);
       const day = parseInt(parts[1], 10);
       const year = parseInt(parts[2], 10);
-      
-      if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 1900 && year <= 2100) {
+
+      if (
+        month >= 1 &&
+        month <= 12 &&
+        day >= 1 &&
+        day <= 31 &&
+        year >= 1900 &&
+        year <= 2100
+      ) {
         const date = new Date(year, month - 1, day);
         if (date.getMonth() === month - 1 && date.getDate() === day) {
           return date;
@@ -560,10 +572,7 @@ export default function ProfilePage() {
                           />
                           <Popover>
                             <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="px-3"
-                              >
+                              <Button variant="outline" className="px-3">
                                 <CalendarIcon className="h-4 w-4" />
                               </Button>
                             </PopoverTrigger>
@@ -630,7 +639,10 @@ export default function ProfilePage() {
                               placeholder="MM/DD/YYYY"
                               value={anniversaryInput}
                               onChange={(e) => {
-                                handleDateInput(e.target.value, setAnniversaryInput);
+                                handleDateInput(
+                                  e.target.value,
+                                  setAnniversaryInput
+                                );
                                 const parsedDate = parseDate(e.target.value);
                                 if (parsedDate) {
                                   setFormData({
@@ -644,10 +656,7 @@ export default function ProfilePage() {
                             />
                             <Popover>
                               <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className="px-3"
-                                >
+                                <Button variant="outline" className="px-3">
                                   <CalendarIcon className="h-4 w-4" />
                                 </Button>
                               </PopoverTrigger>
