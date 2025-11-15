@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
+import { useCampus } from "@/contexts/campus-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import {
@@ -18,6 +19,13 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { StateSelect } from "@/components/ui/state-select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ImageCropModal } from "@/components/profile/image-crop-modal";
 import {
   User,
@@ -28,10 +36,13 @@ import {
   Users,
   Route,
   Home,
+  Church,
+  MapPin,
 } from "lucide-react";
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  const { availableCampuses } = useCampus();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
@@ -46,6 +57,7 @@ export default function ProfilePage() {
     city: "",
     state: "",
     zipCode: "",
+    campusId: "",
   });
 
   useEffect(() => {
@@ -86,6 +98,7 @@ export default function ProfilePage() {
         city: profileData.city || "",
         state: profileData.state || "",
         zipCode: profileData.zipCode || "",
+        campusId: profileData.campusId || "",
       });
     }
   }, [profileData]);
@@ -134,6 +147,7 @@ export default function ProfilePage() {
         city: profileData.city || "",
         state: profileData.state || "",
         zipCode: profileData.zipCode || "",
+        campusId: profileData.campusId || "",
       });
     }
     setIsEditing(false);
@@ -227,7 +241,18 @@ export default function ProfilePage() {
                     {user?.role}
                   </Badge>
                   {user?.organizationName && (
-                    <Badge variant="secondary">{user.organizationName}</Badge>
+                    <Badge variant="outline" className="gap-1">
+                      <Church className="h-3 w-3" />
+                      {user.organizationName}
+                    </Badge>
+                  )}
+                  {profileData?.campusId && availableCampuses.length > 0 && (
+                    <Badge variant="outline" className="gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {availableCampuses.find(
+                        (c) => c.id === profileData.campusId
+                      )?.name || "Home Campus"}
+                    </Badge>
                   )}
                 </div>
               </div>
@@ -412,6 +437,37 @@ export default function ProfilePage() {
                       </p>
                     )}
                   </div>
+
+                  {availableCampuses.length > 0 && (
+                    <div className="space-y-2">
+                      <Label htmlFor="homeCampus">Home Campus</Label>
+                      {isEditing ? (
+                        <Select
+                          value={formData.campusId}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, campusId: value })
+                          }
+                        >
+                          <SelectTrigger id="homeCampus">
+                            <SelectValue placeholder="Select a campus" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableCampuses.map((campus) => (
+                              <SelectItem key={campus.id} value={campus.id}>
+                                {campus.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="text-sm py-2">
+                          {availableCampuses.find(
+                            (c) => c.id === profileData?.campusId
+                          )?.name || "—"}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

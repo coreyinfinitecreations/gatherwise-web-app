@@ -80,6 +80,7 @@ export async function PATCH(request: NextRequest) {
       state,
       zipCode,
       organizationName,
+      campusId,
     } = body;
 
     const updateData: any = {};
@@ -92,6 +93,7 @@ export async function PATCH(request: NextRequest) {
     if (zipCode !== undefined) updateData.zipCode = zipCode;
     if (organizationName !== undefined)
       updateData.organizationName = organizationName;
+    if (campusId !== undefined) updateData.campusId = campusId;
 
     const user = await prisma.user.update({
       where: { id: userId },
