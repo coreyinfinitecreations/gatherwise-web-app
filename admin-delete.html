@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Admin Delete User</title>
+  </head>
+  <body>
+    <h1>Delete User</h1>
+    <form id="deleteForm">
+      <label
+        >Email:
+        <input
+          type="email"
+          id="email"
+          value="cowens@gatherwise.co"
+          required /></label
+      ><br /><br />
+      <label>Admin Key: <input type="password" id="key" required /></label
+      ><br /><br />
+      <button type="submit">Delete User</button>
+    </form>
+    <pre id="result"></pre>
+
+    <script>
+      document
+        .getElementById("deleteForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("email").value;
+          const key = document.getElementById("key").value;
+
+          try {
+            const response = await fetch(
+              `https://test-demo.gatherwise.co/api/admin/delete-user?email=${encodeURIComponent(
+                email
+              )}&key=${encodeURIComponent(key)}`,
+              {
+                method: "DELETE",
+              }
+            );
+            const data = await response.json();
+            document.getElementById("result").textContent = JSON.stringify(
+              data,
+              null,
+              2
+            );
+          } catch (error) {
+            document.getElementById("result").textContent =
+              "Error: " + error.message;
+          }
+        });
+    </script>
+  </body>
+</html>

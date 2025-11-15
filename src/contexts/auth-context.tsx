@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { User } from "@/lib/auth/user-manager";
+import { buildApiUrl } from "@/lib/api-url";
 
 interface AuthContextType {
   user: User | null;
@@ -33,7 +34,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (storedUser) {
         const userData = JSON.parse(storedUser) as User;
 
-        const response = await fetch(`/api/auth/user/${userData.id}`);
+        const response = await fetch(
+          buildApiUrl(`/api/auth/user/${userData.id}`)
+        );
 
         if (response.ok) {
           const { user: currentUser } = await response.json();
@@ -64,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
 
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(buildApiUrl("/api/auth/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

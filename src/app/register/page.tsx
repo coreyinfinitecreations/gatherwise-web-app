@@ -25,6 +25,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { buildApiUrl } from "@/lib/api-url";
 
 interface RegistrationData {
   churchName: string;
@@ -164,7 +165,7 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch(buildApiUrl("/api/auth/register"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
