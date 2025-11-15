@@ -58,6 +58,8 @@ export async function POST(request: NextRequest) {
     const trialEndsAt = new Date();
     trialEndsAt.setDate(trialEndsAt.getDate() + 7);
 
+    const campusName = church.campusName || "Main Campus";
+
     const newChurch = await prisma.church.create({
       data: {
         name: church.name,
@@ -73,7 +75,7 @@ export async function POST(request: NextRequest) {
         paymentMethod: skipPayment ? null : "pending",
         campuses: {
           create: {
-            name: "Main Campus",
+            name: campusName,
             description: "Primary church location",
             address: `${church.address}, ${church.city}, ${church.state} ${church.zipCode}`,
             phone: church.phone,
@@ -85,7 +87,7 @@ export async function POST(request: NextRequest) {
       include: {
         campuses: true,
       },
-    });
+    }) as any;
 
     const mainCampus = newChurch.campuses[0];
 

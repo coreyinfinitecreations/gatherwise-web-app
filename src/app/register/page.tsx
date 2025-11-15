@@ -34,6 +34,8 @@ interface RegistrationData {
   churchZipCode: string;
   churchPhone: string;
   churchEmail: string;
+  hasMultipleCampuses: string;
+  campusName: string;
   adminFirstName: string;
   adminLastName: string;
   adminEmail: string;
@@ -58,6 +60,8 @@ export default function RegisterPage() {
     churchZipCode: "",
     churchPhone: "",
     churchEmail: "",
+    hasMultipleCampuses: "",
+    campusName: "Main Campus",
     adminFirstName: "",
     adminLastName: "",
     adminEmail: "",
@@ -98,6 +102,14 @@ export default function RegisterPage() {
     }
     if (!/^\d{5}(-\d{4})?$/.test(formData.churchZipCode)) {
       setError("Invalid ZIP code format");
+      return false;
+    }
+    if (!formData.hasMultipleCampuses) {
+      setError("Please select if your church has multiple campuses");
+      return false;
+    }
+    if (formData.hasMultipleCampuses === "yes" && !formData.campusName.trim()) {
+      setError("Campus name is required");
       return false;
     }
     return true;
@@ -166,6 +178,8 @@ export default function RegisterPage() {
             zipCode: formData.churchZipCode,
             phone: formData.churchPhone,
             email: formData.churchEmail,
+            hasMultipleCampuses: formData.hasMultipleCampuses === "yes",
+            campusName: formData.campusName,
           },
           admin: {
             firstName: formData.adminFirstName,
@@ -360,6 +374,51 @@ export default function RegisterPage() {
                   placeholder="contact@church.org"
                 />
               </div>
+              <div>
+                <Label>Does your church have multiple campuses? *</Label>
+                <div className="flex gap-4 mt-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="hasMultipleCampuses"
+                      value="no"
+                      checked={formData.hasMultipleCampuses === "no"}
+                      onChange={(e) =>
+                        updateField("hasMultipleCampuses", e.target.value)
+                      }
+                      className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                    />
+                    <span>No, single campus</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="hasMultipleCampuses"
+                      value="yes"
+                      checked={formData.hasMultipleCampuses === "yes"}
+                      onChange={(e) =>
+                        updateField("hasMultipleCampuses", e.target.value)
+                      }
+                      className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                    />
+                    <span>Yes, multiple campuses</span>
+                  </label>
+                </div>
+              </div>
+              {formData.hasMultipleCampuses === "yes" && (
+                <div>
+                  <Label htmlFor="campusName">Primary Campus Name *</Label>
+                  <Input
+                    id="campusName"
+                    value={formData.campusName}
+                    onChange={(e) => updateField("campusName", e.target.value)}
+                    placeholder="Main Campus, Downtown Campus, etc."
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    You can add additional campuses after registration
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
