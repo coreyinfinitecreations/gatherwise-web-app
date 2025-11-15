@@ -277,7 +277,10 @@ export default function ProfilePage() {
                     </CardDescription>
                   </div>
                   {!isEditing ? (
-                    <Button onClick={() => setIsEditing(true)} variant="outline">
+                    <Button
+                      onClick={() => setIsEditing(true)}
+                      variant="outline"
+                    >
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
                     </Button>
@@ -322,7 +325,9 @@ export default function ProfilePage() {
                         }
                       />
                     ) : (
-                      <p className="text-sm py-2">{profileData?.email || "—"}</p>
+                      <p className="text-sm py-2">
+                        {profileData?.email || "—"}
+                      </p>
                     )}
                   </div>
 
@@ -337,7 +342,9 @@ export default function ProfilePage() {
                         }
                       />
                     ) : (
-                      <p className="text-sm py-2">{profileData?.phone || "—"}</p>
+                      <p className="text-sm py-2">
+                        {profileData?.phone || "—"}
+                      </p>
                     )}
                   </div>
 
@@ -352,7 +359,9 @@ export default function ProfilePage() {
                         }
                       />
                     ) : (
-                      <p className="text-sm py-2">{profileData?.address || "—"}</p>
+                      <p className="text-sm py-2">
+                        {profileData?.address || "—"}
+                      </p>
                     )}
                   </div>
 
@@ -381,7 +390,9 @@ export default function ProfilePage() {
                         }
                       />
                     ) : (
-                      <p className="text-sm py-2">{profileData?.state || "—"}</p>
+                      <p className="text-sm py-2">
+                        {profileData?.state || "—"}
+                      </p>
                     )}
                   </div>
 
@@ -396,7 +407,9 @@ export default function ProfilePage() {
                         }
                       />
                     ) : (
-                      <p className="text-sm py-2">{profileData?.zipCode || "—"}</p>
+                      <p className="text-sm py-2">
+                        {profileData?.zipCode || "—"}
+                      </p>
                     )}
                   </div>
                 </div>
