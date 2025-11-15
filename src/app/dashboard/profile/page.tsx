@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useCampus } from "@/contexts/campus-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
+import { useGooglePlaces } from "@/hooks/use-google-places";
 import {
   Card,
   CardContent,
@@ -59,6 +60,7 @@ export default function ProfilePage() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [birthdayInput, setBirthdayInput] = useState("");
   const [anniversaryInput, setAnniversaryInput] = useState("");
+  const addressInputRef = useRef<HTMLInputElement>(null!);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -72,6 +74,27 @@ export default function ProfilePage() {
     maritalStatus: "",
     anniversary: null as Date | null,
   });
+
+  const handleAddressSelect = useCallback(
+    (components: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      fullAddress: string;
+    }) => {
+      setFormData((prev) => ({
+        ...prev,
+        address: components.street,
+        city: components.city,
+        state: components.state,
+        zipCode: components.zipCode,
+      }));
+    },
+    []
+  );
+
+  useGooglePlaces(addressInputRef, handleAddressSelect, isEditing);
 
   const handleDateInput = (value: string, setter: (val: string) => void) => {
     const cleaned = value.replace(/\D/g, "");
@@ -453,7 +476,9 @@ export default function ProfilePage() {
                     <Label htmlFor="address">Address</Label>
                     {isEditing ? (
                       <Input
+                        ref={addressInputRef}
                         id="address"
+                        placeholder="Start typing your address..."
                         value={formData.address}
                         onChange={(e) =>
                           setFormData({ ...formData, address: e.target.value })

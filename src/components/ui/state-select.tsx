@@ -75,7 +75,7 @@ export function StateSelect({
 }: StateSelectProps) {
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed">
+      <SelectTrigger className="w-full bg-muted/50 border-border h-9 shadow-xs">
         <SelectValue placeholder={placeholder}>{value}</SelectValue>
       </SelectTrigger>
       <SelectContent>
