@@ -6,10 +6,7 @@ export async function GET(request: NextRequest) {
     const userId = request.headers.get("x-user-id");
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -18,10 +15,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user?.organizationId) {
-      return NextResponse.json(
-        { churches: [] },
-        { status: 200 }
-      );
+      return NextResponse.json({ churches: [] }, { status: 200 });
     }
 
     const church = await prisma.church.findUnique({
@@ -29,16 +23,10 @@ export async function GET(request: NextRequest) {
     });
 
     if (!church) {
-      return NextResponse.json(
-        { churches: [] },
-        { status: 200 }
-      );
+      return NextResponse.json({ churches: [] }, { status: 200 });
     }
 
-    return NextResponse.json(
-      { churches: [church] },
-      { status: 200 }
-    );
+    return NextResponse.json({ churches: [church] }, { status: 200 });
   } catch (error) {
     console.error("Error fetching churches:", error);
     return NextResponse.json(

@@ -23,12 +23,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    
+
     if (isLoginPage) {
       setTheme("light");
       return;
     }
-    
+
     const savedTheme = localStorage.getItem("theme") as Theme | null;
     const prefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)"
@@ -75,7 +75,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.remove("dark");
       return;
     }
-    
+
     if (theme === "dark") {
       root.classList.add("dark");
     } else {

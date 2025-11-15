@@ -72,7 +72,7 @@ export default function SettingsPage() {
 
   const fetchChurchId = async () => {
     if (!user?.id) return;
-    
+
     try {
       const response = await fetch("/api/churches", {
         headers: {
@@ -247,7 +247,7 @@ export default function SettingsPage() {
         )}
 
         {/* Tabs */}
-        <Tabs 
+        <Tabs
           value={currentTab}
           className="space-y-6"
           onValueChange={(value) => {

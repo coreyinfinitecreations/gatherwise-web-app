@@ -21,7 +21,7 @@ export default function RolesPage() {
 
   const fetchChurchId = async () => {
     if (!user?.id) return;
-    
+
     try {
       const response = await fetch("/api/churches", {
         headers: {
@@ -49,8 +49,8 @@ export default function RolesPage() {
           </p>
         </div>
 
-        <Tabs 
-          value="team" 
+        <Tabs
+          value="team"
           className="space-y-6"
           onValueChange={(value) => {
             if (value === "security") {
@@ -76,8 +76,8 @@ export default function RolesPage() {
           </TabsList>
 
           <TabsContent value="team" className="space-y-6">
-            <RolePermissionManager 
-              churchId={churchId || user?.organizationId || ""} 
+            <RolePermissionManager
+              churchId={churchId || user?.organizationId || ""}
               userId={user?.id || ""}
             />
           </TabsContent>

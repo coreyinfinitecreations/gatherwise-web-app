@@ -72,8 +72,8 @@ export default function OrganizationPage() {
           </p>
         </div>
 
-        <Tabs 
-          value="organization" 
+        <Tabs
+          value="organization"
           className="space-y-6"
           onValueChange={(value) => {
             if (value === "security") {
