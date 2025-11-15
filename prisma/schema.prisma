@@ -51,6 +51,10 @@ model User {
   city                String?
   state               String?
   zipCode             String?
+  birthday            DateTime?
+  maritalStatus       String?
+  anniversary         DateTime?
+  themePreference     String?              @default("light")
   isActive            Boolean              @default(true)
   loginAttempts       Int                  @default(0)
   lockedUntil         DateTime?

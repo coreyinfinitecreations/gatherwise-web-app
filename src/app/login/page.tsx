@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import Link from "next/link";
+import { toast } from "react-toastify";
 import {
   Eye,
   EyeOff,

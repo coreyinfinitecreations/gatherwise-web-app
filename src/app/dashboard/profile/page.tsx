@@ -6,6 +6,7 @@ import { useCampus } from "@/contexts/campus-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import { useGooglePlaces } from "@/hooks/use-google-places";
+import { toast } from "react-toastify";
 import {
   Card,
   CardContent,
@@ -54,8 +55,6 @@ export default function ProfilePage() {
   const { availableCampuses } = useCampus();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [birthdayInput, setBirthdayInput] = useState("");
@@ -217,13 +216,11 @@ export default function ProfilePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
-      setSuccess("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
       setIsEditing(false);
-      setError("");
-      setTimeout(() => setSuccess(""), 3000);
     },
     onError: (err: Error) => {
-      setError(err.message || "Failed to update profile");
+      toast.error(err.message || "Failed to update profile");
     },
   });
 
@@ -250,7 +247,6 @@ export default function ProfilePage() {
       });
     }
     setIsEditing(false);
-    setError("");
   };
 
   const handleSaveProfileImage = (croppedImage: string) => {
@@ -263,8 +259,7 @@ export default function ProfilePage() {
         })
       );
     }
-    setSuccess("Profile picture updated!");
-    setTimeout(() => setSuccess(""), 3000);
+    toast.success("Profile picture updated!");
   };
 
   const handleRemoveImage = () => {
@@ -277,8 +272,7 @@ export default function ProfilePage() {
         })
       );
     }
-    setSuccess("Profile picture removed");
-    setTimeout(() => setSuccess(""), 3000);
+    toast.success("Profile picture removed");
   };
 
   const getInitials = (name: string) => {
@@ -375,18 +369,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Success/Error Messages */}
-        {success && (
-          <div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-4 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800">
-            {success}
-          </div>
-        )}
-        {error && (
-          <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800">
-            {error}
-          </div>
-        )}
-
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Personal Information (2/3 width) */}
@@ -478,6 +460,7 @@ export default function ProfilePage() {
                       <Input
                         ref={addressInputRef}
                         id="address"
+                        autoComplete="off"
                         placeholder="Start typing your address..."
                         value={formData.address}
                         onChange={(e) =>

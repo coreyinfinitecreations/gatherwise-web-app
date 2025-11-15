@@ -165,3 +165,42 @@
   transform: translateY(-2px);
   border-color: #6366f1;
 }
+
+.Toastify__toast-container {
+  z-index: 9999;
+}
+
+.Toastify__toast {
+  font-family: var(--font-geist-sans);
+  border-radius: 0.625rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dark .Toastify__toast {
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+}
+
+.dark .Toastify__toast--success {
+  background-color: hsl(142, 76%, 36%);
+  color: white;
+}
+
+.dark .Toastify__toast--error {
+  background-color: hsl(0, 84%, 60%);
+  color: white;
+}
+
+.dark .Toastify__toast--info {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.dark .Toastify__toast--warning {
+  background-color: hsl(38, 92%, 50%);
+  color: white;
+}
+
+.dark .Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.7);
+}

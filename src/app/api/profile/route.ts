@@ -28,6 +28,10 @@ export async function GET(request: NextRequest) {
         city: true,
         state: true,
         zipCode: true,
+        birthday: true,
+        maritalStatus: true,
+        anniversary: true,
+        themePreference: true,
         isActive: true,
         hasMultipleCampuses: true,
         onboardingCompleted: true,
@@ -81,6 +85,10 @@ export async function PATCH(request: NextRequest) {
       zipCode,
       organizationName,
       campusId,
+      birthday,
+      maritalStatus,
+      anniversary,
+      themePreference,
     } = body;
 
     const updateData: any = {};
@@ -94,6 +102,13 @@ export async function PATCH(request: NextRequest) {
     if (organizationName !== undefined)
       updateData.organizationName = organizationName;
     if (campusId !== undefined) updateData.campusId = campusId;
+    if (birthday !== undefined)
+      updateData.birthday = birthday ? new Date(birthday) : null;
+    if (maritalStatus !== undefined) updateData.maritalStatus = maritalStatus;
+    if (anniversary !== undefined)
+      updateData.anniversary = anniversary ? new Date(anniversary) : null;
+    if (themePreference !== undefined)
+      updateData.themePreference = themePreference;
 
     const user = await prisma.user.update({
       where: { id: userId },
@@ -112,6 +127,10 @@ export async function PATCH(request: NextRequest) {
         city: true,
         state: true,
         zipCode: true,
+        birthday: true,
+        maritalStatus: true,
+        anniversary: true,
+        themePreference: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,

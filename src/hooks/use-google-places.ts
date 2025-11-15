@@ -24,23 +24,52 @@ export function useGooglePlaces(
 
   useEffect(() => {
     const loadGoogleMapsScript = () => {
-      if (typeof window !== "undefined" && !window.google) {
-        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (typeof window === "undefined") return;
 
-        if (!apiKey) {
-          console.error("Google Maps API key is not configured");
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => setIsLoaded(true);
-        document.head.appendChild(script);
-      } else if (window.google) {
+      if (window.google?.maps?.places) {
+        console.log("Google Maps already loaded");
         setIsLoaded(true);
+        return;
       }
+
+      const existingScript = document.querySelector(
+        'script[src*="maps.googleapis.com"]'
+      );
+
+      if (existingScript) {
+        console.log("Google Maps script exists, waiting for load...");
+        const checkGoogleLoaded = setInterval(() => {
+          if (window.google?.maps?.places) {
+            console.log("Google Maps loaded via existing script");
+            setIsLoaded(true);
+            clearInterval(checkGoogleLoaded);
+          }
+        }, 100);
+
+        setTimeout(() => clearInterval(checkGoogleLoaded), 10000);
+        return;
+      }
+
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+      if (!apiKey) {
+        console.error("Google Maps API key is not configured");
+        return;
+      }
+
+      console.log("Loading Google Maps script...");
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        console.log("Google Maps script loaded successfully");
+        setIsLoaded(true);
+      };
+      script.onerror = () => {
+        console.error("Failed to load Google Maps script");
+      };
+      document.head.appendChild(script);
     };
 
     loadGoogleMapsScript();
@@ -58,9 +87,21 @@ export function useGooglePlaces(
 
     const initAutocomplete = async () => {
       const input = inputRef.current;
-      if (!input) return;
+      if (!input) {
+        console.log("Input ref is null, skipping autocomplete init");
+        return;
+      }
 
-      console.log("Initializing Google Places Autocomplete");
+      if (autocompleteRef.current) {
+        console.log("Cleaning up existing autocomplete instance");
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        autocompleteRef.current = null;
+      }
+
+      console.log(
+        "Initializing Google Places Autocomplete for input:",
+        input.id
+      );
 
       try {
         autocompleteRef.current = new google.maps.places.Autocomplete(input, {
@@ -132,12 +173,14 @@ export function useGooglePlaces(
       }
     };
 
-    const timeoutId = setTimeout(initAutocomplete, 100);
+    const timeoutId = setTimeout(initAutocomplete, 200);
 
     return () => {
       clearTimeout(timeoutId);
       if (autocompleteRef.current) {
+        console.log("Cleaning up autocomplete on unmount");
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        autocompleteRef.current = null;
       }
     };
   }, [isActive, isLoaded, inputRef, onAddressSelect]);
