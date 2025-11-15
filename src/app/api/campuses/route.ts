@@ -26,13 +26,8 @@ export async function GET(request: NextRequest) {
 
     const campuses = await prisma.campus.findMany({
       where: {
-        church: {
-          members: {
-            some: {
-              userId: userId,
-            },
-          },
-        },
+        churchId: user.organizationId,
+        isActive: true,
       },
       include: {
         _count: {
