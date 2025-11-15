@@ -1,3 +1,55 @@
+## .github/copilot-instructions.md — Gatherwise (web-app)
+
+This file is a short, actionable guide for AI coding agents working in the Gatherwise web app repository.
+
+Core architecture (quick):
+
+- Next.js (App Router) + TypeScript + Tailwind + shadcn/ui components.
+- Server data layer: Prisma + PostgreSQL (see `prisma/schema.prisma`). App is multi-campus (multi-tenant-like): some models are church-wide and others are campus-specific.
+
+Key tech & patterns to preserve:
+
+- Auth: custom `UserManager` + passkey support (see `src/lib/auth/user-manager.ts` and `src/lib/auth/passkey-manager.ts`). Do not replace with NextAuth without adjusting middleware and auth context.
+- Prisma singleton: always import `prisma` from `src/lib/prisma.ts` (uses globalThis in dev). Avoid `new PrismaClient()` elsewhere.
+- Providers order matters: `QueryProvider` → `AuthProvider` → `CampusProvider` (root layout in `src/app/layout.tsx`). Preserve this ordering when adding providers.
+- Campus context is authoritative for filtering UI and API calls. Use `useCampus()` / `useCampusFilter()` before performing campus-specific reads/writes.
+
+Developer workflows (essential commands):
+
+- Start dev server: npm run dev
+- Build: npm run build
+- Lint: npm run lint
+- Database seed: see `prisma/seed.ts` (run with `ts-node` or compile first). Required envs: `DATABASE_URL` and `DIRECT_DATABASE_URL`.
+
+Integration & cross-component notes:
+
+- Server calls: prefer existing API routes under `src/app/api/*` for server-side logic. Examples: `POST /api/auth/login` (uses `UserManager.authenticateUser`) and passkey routes under `src/app/api/auth/passkeys`.
+- Middleware: `src/middleware.ts` protects `/dashboard/*`. It checks an `isAuthenticated` cookie or `Authorization` header — update both middleware and `AuthProvider` if you change auth signaling.
+- Scripts in `scripts/` access the DB directly (e.g., `scripts/test-auth.ts`, `scripts/check-users.ts`) — ensure DB envs are set when running them.
+
+Conventions & code style (project-specific):
+
+- **NEVER add code comments** — this is a strict rule. Write self-documenting code with descriptive variable/function names instead. If code needs explanation, refactor it to be clearer.
+- Keep functions small and focused. Break complex UI or server logic into composable helpers.
+- UI primitives live in `src/components/ui/*`. Dashboard pages are under `src/app/dashboard/*`.
+- Use React Query for server state (QueryProvider). Prefer refetch/invalidate patterns over ad-hoc state plumbing.
+
+Files to read first for non-trivial changes:
+
+- `src/lib/auth/user-manager.ts`, `src/lib/auth/passkey-manager.ts`
+- `src/lib/prisma.ts`
+- `src/app/layout.tsx`, `src/contexts/auth-context.tsx`, `src/middleware.ts`
+- `prisma/schema.prisma`, `prisma/seed.ts`
+- `src/app/api/*` (for examples of server routes and logging style)
+
+Quick examples:
+
+- DB access (server): import prisma from 'src/lib/prisma'
+- Auth login API: POST `/api/auth/login` -> `src/app/api/auth/login/route.ts`
+- Campus-aware filtering: use `useCampus()` and `useCampusFilter()` (see `src/hooks/use-campus-filter.ts`)
+
+If anything above is unclear or you'd like the file expanded to include coding examples, tests, or additional scripts, tell me which area to expand and I'll iterate.
+
 # Gatherwise Church Management Application
 
 ## Architecture Overview

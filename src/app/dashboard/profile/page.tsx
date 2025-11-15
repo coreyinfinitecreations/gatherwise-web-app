@@ -19,6 +19,15 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { StateSelect } from "@/components/ui/state-select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
   SelectContent,
@@ -58,6 +67,9 @@ export default function ProfilePage() {
     state: "",
     zipCode: "",
     campusId: "",
+    birthday: null as Date | null,
+    maritalStatus: "",
+    anniversary: null as Date | null,
   });
 
   useEffect(() => {
@@ -99,6 +111,11 @@ export default function ProfilePage() {
         state: profileData.state || "",
         zipCode: profileData.zipCode || "",
         campusId: profileData.campusId || "",
+        birthday: profileData.birthday ? new Date(profileData.birthday) : null,
+        maritalStatus: profileData.maritalStatus || "",
+        anniversary: profileData.anniversary
+          ? new Date(profileData.anniversary)
+          : null,
       });
     }
   }, [profileData]);
@@ -148,6 +165,11 @@ export default function ProfilePage() {
         state: profileData.state || "",
         zipCode: profileData.zipCode || "",
         campusId: profileData.campusId || "",
+        birthday: profileData.birthday ? new Date(profileData.birthday) : null,
+        maritalStatus: profileData.maritalStatus || "",
+        anniversary: profileData.anniversary
+          ? new Date(profileData.anniversary)
+          : null,
       });
     }
     setIsEditing(false);
@@ -468,6 +490,126 @@ export default function ProfilePage() {
                       )}
                     </div>
                   )}
+                </div>
+
+                <div className="border-t pt-6 mt-6">
+                  <h3 className="text-lg font-semibold mb-4">Special Dates</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="birthday">Birthday</Label>
+                      {isEditing ? (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !formData.birthday && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {formData.birthday ? (
+                                format(formData.birthday, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={formData.birthday || undefined}
+                              onSelect={(date) =>
+                                setFormData({
+                                  ...formData,
+                                  birthday: date || null,
+                                })
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <p className="text-sm py-2">
+                          {profileData?.birthday
+                            ? format(new Date(profileData.birthday), "PPP")
+                            : "—"}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="maritalStatus">Marital Status</Label>
+                      {isEditing ? (
+                        <Select
+                          value={formData.maritalStatus}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, maritalStatus: value })
+                          }
+                        >
+                          <SelectTrigger id="maritalStatus">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="single">Single</SelectItem>
+                            <SelectItem value="married">Married</SelectItem>
+                            <SelectItem value="divorced">Divorced</SelectItem>
+                            <SelectItem value="widowed">Widowed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="text-sm py-2 capitalize">
+                          {profileData?.maritalStatus || "—"}
+                        </p>
+                      )}
+                    </div>
+
+                    {formData.maritalStatus === "married" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="anniversary">Anniversary</Label>
+                        {isEditing ? (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !formData.anniversary &&
+                                    "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {formData.anniversary ? (
+                                  format(formData.anniversary, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={formData.anniversary || undefined}
+                                onSelect={(date) =>
+                                  setFormData({
+                                    ...formData,
+                                    anniversary: date || null,
+                                  })
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        ) : (
+                          <p className="text-sm py-2">
+                            {profileData?.anniversary
+                              ? format(new Date(profileData.anniversary), "PPP")
+                              : "—"}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
