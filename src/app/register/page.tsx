@@ -67,7 +67,10 @@ export default function RegisterPage() {
     skipPayment: false,
   });
 
-  const updateField = (field: keyof RegistrationData, value: string | boolean) => {
+  const updateField = (
+    field: keyof RegistrationData,
+    value: string | boolean
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setError("");
   };
@@ -182,7 +185,10 @@ export default function RegisterPage() {
         throw new Error(data.error || "Registration failed");
       }
 
-      const loginSuccess = await login(formData.adminEmail, formData.adminPassword);
+      const loginSuccess = await login(
+        formData.adminEmail,
+        formData.adminPassword
+      );
 
       if (loginSuccess) {
         router.push("/onboarding");
@@ -224,7 +230,11 @@ export default function RegisterPage() {
                     step >= 1 ? "bg-primary text-white" : "bg-muted"
                   }`}
                 >
-                  {step > 1 ? <Check className="w-4 h-4" /> : <Church className="w-4 h-4" />}
+                  {step > 1 ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Church className="w-4 h-4" />
+                  )}
                 </div>
                 <span className="text-sm font-medium">Church</span>
               </div>
@@ -245,7 +255,11 @@ export default function RegisterPage() {
                     step >= 2 ? "bg-primary text-white" : "bg-muted"
                   }`}
                 >
-                  {step > 2 ? <Check className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                  {step > 2 ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <User className="w-4 h-4" />
+                  )}
                 </div>
                 <span className="text-sm font-medium">Account</span>
               </div>
@@ -314,7 +328,9 @@ export default function RegisterPage() {
                   <Label htmlFor="churchState">State *</Label>
                   <StateSelect
                     value={formData.churchState}
-                    onChange={(value: string) => updateField("churchState", value)}
+                    onChange={(value: string) =>
+                      updateField("churchState", value)
+                    }
                   />
                 </div>
               </div>
@@ -355,7 +371,9 @@ export default function RegisterPage() {
                   <Input
                     id="adminFirstName"
                     value={formData.adminFirstName}
-                    onChange={(e) => updateField("adminFirstName", e.target.value)}
+                    onChange={(e) =>
+                      updateField("adminFirstName", e.target.value)
+                    }
                     placeholder="John"
                   />
                 </div>
@@ -364,7 +382,9 @@ export default function RegisterPage() {
                   <Input
                     id="adminLastName"
                     value={formData.adminLastName}
-                    onChange={(e) => updateField("adminLastName", e.target.value)}
+                    onChange={(e) =>
+                      updateField("adminLastName", e.target.value)
+                    }
                     placeholder="Doe"
                   />
                 </div>
@@ -402,7 +422,9 @@ export default function RegisterPage() {
                   id="adminConfirmPassword"
                   type="password"
                   value={formData.adminConfirmPassword}
-                  onChange={(e) => updateField("adminConfirmPassword", e.target.value)}
+                  onChange={(e) =>
+                    updateField("adminConfirmPassword", e.target.value)
+                  }
                   placeholder="Re-enter password"
                 />
               </div>
@@ -416,14 +438,16 @@ export default function RegisterPage() {
                   7-Day Free Trial
                 </h3>
                 <p className="text-sm text-purple-700 mb-4">
-                  Your trial starts today and ends in 7 days. No charges will be made during
-                  your trial period.
+                  Your trial starts today and ends in 7 days. No charges will be
+                  made during your trial period.
                 </p>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-purple-700">Trial Period:</span>
                   <span className="font-semibold text-purple-900">
                     {new Date().toLocaleDateString()} -{" "}
-                    {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                    {new Date(
+                      Date.now() + 7 * 24 * 60 * 60 * 1000
+                    ).toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -434,7 +458,9 @@ export default function RegisterPage() {
                     type="checkbox"
                     id="skipPayment"
                     checked={formData.skipPayment}
-                    onChange={(e) => updateField("skipPayment", e.target.checked)}
+                    onChange={(e) =>
+                      updateField("skipPayment", e.target.checked)
+                    }
                     className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                   />
                   <Label htmlFor="skipPayment" className="cursor-pointer">
@@ -445,8 +471,9 @@ export default function RegisterPage() {
                 {!formData.skipPayment && (
                   <div className="border rounded-lg p-4 space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Add your payment method now to automatically activate your subscription
-                      when your trial ends. You won't be charged until then.
+                      Add your payment method now to automatically activate your
+                      subscription when your trial ends. You won't be charged
+                      until then.
                     </p>
                     <div>
                       <Label htmlFor="cardNumber">Card Number</Label>
@@ -467,7 +494,11 @@ export default function RegisterPage() {
                       </div>
                       <div>
                         <Label htmlFor="cvc">CVC</Label>
-                        <Input id="cvc" placeholder="123" disabled={isSubmitting} />
+                        <Input
+                          id="cvc"
+                          placeholder="123"
+                          disabled={isSubmitting}
+                        />
                       </div>
                     </div>
                   </div>
@@ -476,8 +507,8 @@ export default function RegisterPage() {
                 {formData.skipPayment && (
                   <Alert>
                     <AlertDescription>
-                      You can add payment information later from your account settings before
-                      your trial expires.
+                      You can add payment information later from your account
+                      settings before your trial expires.
                     </AlertDescription>
                   </Alert>
                 )}

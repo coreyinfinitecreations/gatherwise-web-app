@@ -14,16 +14,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!admin.email || !admin.password || !admin.firstName || !admin.lastName) {
+    if (
+      !admin.email ||
+      !admin.password ||
+      !admin.firstName ||
+      !admin.lastName
+    ) {
       return NextResponse.json(
-        { error: "Admin email, password, first name, and last name are required" },
+        {
+          error:
+            "Admin email, password, first name, and last name are required",
+        },
         { status: 400 }
       );
     }
 
-    if (!church.name || !church.address || !church.city || !church.state || !church.zipCode) {
+    if (
+      !church.name ||
+      !church.address ||
+      !church.city ||
+      !church.state ||
+      !church.zipCode
+    ) {
       return NextResponse.json(
-        { error: "Church name, address, city, state, and ZIP code are required" },
+        {
+          error: "Church name, address, city, state, and ZIP code are required",
+        },
         { status: 400 }
       );
     }
@@ -81,7 +97,7 @@ export async function POST(request: NextRequest) {
         name: `${admin.firstName} ${admin.lastName}`,
         passwordHash,
         phone: admin.phone,
-        role: "ADMIN",
+        role: "SUPER_ADMIN",
         organizationId: newChurch.id,
         organizationName: newChurch.name,
         campusId: mainCampus.id,
@@ -131,9 +147,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Failed to create account",
+          error instanceof Error ? error.message : "Failed to create account",
       },
       { status: 500 }
     );
