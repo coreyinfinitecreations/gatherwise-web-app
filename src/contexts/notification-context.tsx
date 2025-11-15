@@ -65,6 +65,8 @@ export function NotificationProvider({
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const reconnectAttempts = useRef(0);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const lastNotificationIdRef = useRef<string | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     if (!user?.id) return;
@@ -79,9 +81,33 @@ export function NotificationProvider({
       if (response.ok) {
         const data = await response.json();
         setNotifications(data.notifications || []);
+        
+        if (data.notifications && data.notifications.length > 0) {
+          const newestId = data.notifications[0].id;
+          
+          if (lastNotificationIdRef.current && lastNotificationIdRef.current !== newestId) {
+            const storedMuted = localStorage.getItem("notificationsMuted") === "true";
+            
+            if (!storedMuted) {
+              const newNotification = data.notifications[0];
+              const toastEvent = new CustomEvent("showNotificationToast", {
+                detail: {
+                  id: newNotification.id,
+                  title: newNotification.title,
+                  message: newNotification.message,
+                  type: newNotification.type,
+                  link: newNotification.link,
+                },
+              });
+              window.dispatchEvent(toastEvent);
+            }
+          }
+          
+          lastNotificationIdRef.current = newestId;
+        }
       }
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      console.error("Failed to fetch notifications:", error);
     }
   }, [user?.id]);
 
@@ -164,11 +190,35 @@ export function NotificationProvider({
           reconnectAttempts.current += 1;
           connectWebSocket();
         }, delay);
+      } else {
+        console.log("WebSocket reconnection failed, falling back to polling");
+        startPolling();
       }
     };
 
     wsRef.current = ws;
   }, [user?.id, fetchNotifications]);
+
+  const startPolling = useCallback(() => {
+    if (pollingIntervalRef.current) return;
+    
+    console.log("Starting notification polling (every 10 seconds)");
+    setConnectionStatus("connected");
+    
+    pollingIntervalRef.current = setInterval(() => {
+      fetchNotifications();
+    }, 10000);
+    
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  const stopPolling = useCallback(() => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = undefined;
+      console.log("Stopped notification polling");
+    }
+  }, []);
 
   useEffect(() => {
     if (user?.id) {
@@ -183,8 +233,9 @@ export function NotificationProvider({
       if (wsRef.current) {
         wsRef.current.close();
       }
+      stopPolling();
     };
-  }, [user?.id, fetchNotifications, connectWebSocket]);
+  }, [user?.id, fetchNotifications, connectWebSocket, stopPolling]);
 
   const toggleMute = () => {
     setIsMuted((prev) => {
