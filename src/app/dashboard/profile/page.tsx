@@ -38,7 +38,6 @@ import {
 import { ImageCropModal } from "@/components/profile/image-crop-modal";
 import {
   User,
-  Calendar,
   Camera,
   Edit,
   DollarSign,
@@ -58,6 +57,8 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [birthdayInput, setBirthdayInput] = useState("");
+  const [anniversaryInput, setAnniversaryInput] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -71,6 +72,37 @@ export default function ProfilePage() {
     maritalStatus: "",
     anniversary: null as Date | null,
   });
+
+  const handleDateInput = (value: string, setter: (val: string) => void) => {
+    const cleaned = value.replace(/\D/g, "");
+    let formatted = cleaned;
+
+    if (cleaned.length >= 2) {
+      formatted = cleaned.slice(0, 2) + "/" + cleaned.slice(2);
+    }
+    if (cleaned.length >= 4) {
+      formatted = cleaned.slice(0, 2) + "/" + cleaned.slice(2, 4) + "/" + cleaned.slice(4, 8);
+    }
+
+    setter(formatted);
+  };
+
+  const parseDate = (input: string): Date | null => {
+    const parts = input.split("/");
+    if (parts.length === 3) {
+      const month = parseInt(parts[0], 10);
+      const day = parseInt(parts[1], 10);
+      const year = parseInt(parts[2], 10);
+      
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 1900 && year <= 2100) {
+        const date = new Date(year, month - 1, day);
+        if (date.getMonth() === month - 1 && date.getDate() === day) {
+          return date;
+        }
+      }
+    }
+    return null;
+  };
 
   useEffect(() => {
     if (user?.id) {
@@ -117,6 +149,16 @@ export default function ProfilePage() {
           ? new Date(profileData.anniversary)
           : null,
       });
+      setBirthdayInput(
+        profileData.birthday
+          ? format(new Date(profileData.birthday), "MM/dd/yyyy")
+          : ""
+      );
+      setAnniversaryInput(
+        profileData.anniversary
+          ? format(new Date(profileData.anniversary), "MM/dd/yyyy")
+          : ""
+      );
     }
   }, [profileData]);
 
@@ -282,7 +324,7 @@ export default function ProfilePage() {
 
             <div className="flex flex-col gap-2 mt-4 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Calendar className="h-4 w-4" />
+                <CalendarIcon className="h-4 w-4" />
                 <span>
                   Joined{" "}
                   {user?.createdAt
@@ -498,37 +540,51 @@ export default function ProfilePage() {
                     <div className="space-y-2">
                       <Label htmlFor="birthday">Birthday</Label>
                       {isEditing ? (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !formData.birthday && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {formData.birthday ? (
-                                format(formData.birthday, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={formData.birthday || undefined}
-                              onSelect={(date) =>
+                        <div className="flex gap-2">
+                          <Input
+                            id="birthday"
+                            placeholder="MM/DD/YYYY"
+                            value={birthdayInput}
+                            onChange={(e) => {
+                              handleDateInput(e.target.value, setBirthdayInput);
+                              const parsedDate = parseDate(e.target.value);
+                              if (parsedDate) {
                                 setFormData({
                                   ...formData,
-                                  birthday: date || null,
-                                })
+                                  birthday: parsedDate,
+                                });
                               }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
+                            }}
+                            maxLength={10}
+                            className="flex-1"
+                          />
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="px-3"
+                              >
+                                <CalendarIcon className="h-4 w-4" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={formData.birthday || undefined}
+                                onSelect={(date) => {
+                                  setFormData({
+                                    ...formData,
+                                    birthday: date || null,
+                                  });
+                                  setBirthdayInput(
+                                    date ? format(date, "MM/dd/yyyy") : ""
+                                  );
+                                }}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
                       ) : (
                         <p className="text-sm py-2">
                           {profileData?.birthday
@@ -568,38 +624,51 @@ export default function ProfilePage() {
                       <div className="space-y-2">
                         <Label htmlFor="anniversary">Anniversary</Label>
                         {isEditing ? (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal",
-                                  !formData.anniversary &&
-                                    "text-muted-foreground"
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {formData.anniversary ? (
-                                  format(formData.anniversary, "PPP")
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                              <Calendar
-                                mode="single"
-                                selected={formData.anniversary || undefined}
-                                onSelect={(date) =>
+                          <div className="flex gap-2">
+                            <Input
+                              id="anniversary"
+                              placeholder="MM/DD/YYYY"
+                              value={anniversaryInput}
+                              onChange={(e) => {
+                                handleDateInput(e.target.value, setAnniversaryInput);
+                                const parsedDate = parseDate(e.target.value);
+                                if (parsedDate) {
                                   setFormData({
                                     ...formData,
-                                    anniversary: date || null,
-                                  })
+                                    anniversary: parsedDate,
+                                  });
                                 }
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
+                              }}
+                              maxLength={10}
+                              className="flex-1"
+                            />
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="px-3"
+                                >
+                                  <CalendarIcon className="h-4 w-4" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                  mode="single"
+                                  selected={formData.anniversary || undefined}
+                                  onSelect={(date) => {
+                                    setFormData({
+                                      ...formData,
+                                      anniversary: date || null,
+                                    });
+                                    setAnniversaryInput(
+                                      date ? format(date, "MM/dd/yyyy") : ""
+                                    );
+                                  }}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
                         ) : (
                           <p className="text-sm py-2">
                             {profileData?.anniversary
