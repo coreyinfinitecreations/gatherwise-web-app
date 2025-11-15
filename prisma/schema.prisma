@@ -89,6 +89,11 @@ model Church {
   email                   String?
   website                 String?
   observesChurchMembership Boolean       @default(true)
+  trialEndsAt             DateTime?
+  subscriptionStatus      String         @default("trial")
+  stripeCustomerId        String?
+  stripeSubscriptionId    String?
+  paymentMethod           String?
   members                 ChurchMember[]
   pathways                Pathway[]
   campuses                Campus[]
