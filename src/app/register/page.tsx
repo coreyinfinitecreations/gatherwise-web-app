@@ -218,14 +218,14 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-950 via-blue-900 via-30% via-purple-600 via-45% via-blue-900 via-60% to-indigo-950 animated-gradient p-4">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-2xl">
+      <Card className="w-full max-w-2xl shadow-xl bg-white">
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
             {step === 1 && "Church Information"}
             {step === 2 && "Administrator Account"}
-            {step === 3 && "Payment Setup (Optional)"}
+            {step === 3 && "Payment Setup"}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-base">
             {step === 1 && "Tell us about your church"}
             {step === 2 && "Create your administrator account"}
             {step === 3 && "Start your 7-day free trial"}
@@ -310,36 +310,47 @@ export default function RegisterPage() {
 
           {step === 1 && (
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="churchName">Church Name *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="churchName" className="text-foreground">
+                  Church Name *
+                </Label>
                 <Input
                   id="churchName"
                   value={formData.churchName}
                   onChange={(e) => updateField("churchName", e.target.value)}
                   placeholder="Enter your church name"
+                  className="bg-white"
                 />
               </div>
-              <div>
-                <Label htmlFor="churchAddress">Address *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="churchAddress" className="text-foreground">
+                  Address *
+                </Label>
                 <Input
                   id="churchAddress"
                   value={formData.churchAddress}
                   onChange={(e) => updateField("churchAddress", e.target.value)}
                   placeholder="Street address"
+                  className="bg-white"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="churchCity">City *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="churchCity" className="text-foreground">
+                    City *
+                  </Label>
                   <Input
                     id="churchCity"
                     value={formData.churchCity}
                     onChange={(e) => updateField("churchCity", e.target.value)}
                     placeholder="City"
+                    className="bg-white"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="churchState">State *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="churchState" className="text-foreground">
+                    State *
+                  </Label>
                   <StateSelect
                     value={formData.churchState}
                     onChange={(value: string) =>
@@ -348,34 +359,44 @@ export default function RegisterPage() {
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="churchZipCode">ZIP Code *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="churchZipCode" className="text-foreground">
+                  ZIP Code *
+                </Label>
                 <Input
                   id="churchZipCode"
                   value={formData.churchZipCode}
                   onChange={(e) => updateField("churchZipCode", e.target.value)}
                   placeholder="12345"
+                  className="bg-white"
                 />
               </div>
-              <div>
-                <Label htmlFor="churchPhone">Phone</Label>
+              <div className="space-y-2">
+                <Label htmlFor="churchPhone" className="text-foreground">
+                  Phone
+                </Label>
                 <PhoneInput
                   value={formData.churchPhone}
                   onChange={(value) => updateField("churchPhone", value)}
                 />
               </div>
-              <div>
-                <Label htmlFor="churchEmail">Email</Label>
+              <div className="space-y-2">
+                <Label htmlFor="churchEmail" className="text-foreground">
+                  Email
+                </Label>
                 <Input
                   id="churchEmail"
                   type="email"
                   value={formData.churchEmail}
                   onChange={(e) => updateField("churchEmail", e.target.value)}
                   placeholder="contact@church.org"
+                  className="bg-white"
                 />
               </div>
-              <div>
-                <Label>Does your church have multiple campuses? *</Label>
+              <div className="space-y-2">
+                <Label className="text-foreground">
+                  Does your church have multiple campuses? *
+                </Label>
                 <div className="flex gap-4 mt-2">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -388,7 +409,7 @@ export default function RegisterPage() {
                       }
                       className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
                     />
-                    <span>No, single campus</span>
+                    <span className="text-foreground">No, single campus</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -401,18 +422,23 @@ export default function RegisterPage() {
                       }
                       className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
                     />
-                    <span>Yes, multiple campuses</span>
+                    <span className="text-foreground">
+                      Yes, multiple campuses
+                    </span>
                   </label>
                 </div>
               </div>
               {formData.hasMultipleCampuses === "yes" && (
-                <div>
-                  <Label htmlFor="campusName">Primary Campus Name *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="campusName" className="text-foreground">
+                    Primary Campus Name *
+                  </Label>
                   <Input
                     id="campusName"
                     value={formData.campusName}
                     onChange={(e) => updateField("campusName", e.target.value)}
                     placeholder="Main Campus, Downtown Campus, etc."
+                    className="bg-white"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     You can add additional campuses after registration
@@ -425,8 +451,10 @@ export default function RegisterPage() {
           {step === 2 && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="adminFirstName">First Name *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="adminFirstName" className="text-foreground">
+                    First Name *
+                  </Label>
                   <Input
                     id="adminFirstName"
                     value={formData.adminFirstName}
@@ -434,10 +462,13 @@ export default function RegisterPage() {
                       updateField("adminFirstName", e.target.value)
                     }
                     placeholder="John"
+                    className="bg-white"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="adminLastName">Last Name *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="adminLastName" className="text-foreground">
+                    Last Name *
+                  </Label>
                   <Input
                     id="adminLastName"
                     value={formData.adminLastName}
@@ -445,38 +476,52 @@ export default function RegisterPage() {
                       updateField("adminLastName", e.target.value)
                     }
                     placeholder="Doe"
+                    className="bg-white"
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="adminEmail">Email *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="adminEmail" className="text-foreground">
+                  Email *
+                </Label>
                 <Input
                   id="adminEmail"
                   type="email"
                   value={formData.adminEmail}
                   onChange={(e) => updateField("adminEmail", e.target.value)}
                   placeholder="admin@church.org"
+                  className="bg-white"
                 />
               </div>
-              <div>
-                <Label htmlFor="adminPhone">Phone</Label>
+              <div className="space-y-2">
+                <Label htmlFor="adminPhone" className="text-foreground">
+                  Phone
+                </Label>
                 <PhoneInput
                   value={formData.adminPhone}
                   onChange={(value) => updateField("adminPhone", value)}
                 />
               </div>
-              <div>
-                <Label htmlFor="adminPassword">Password *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="adminPassword" className="text-foreground">
+                  Password *
+                </Label>
                 <Input
                   id="adminPassword"
                   type="password"
                   value={formData.adminPassword}
                   onChange={(e) => updateField("adminPassword", e.target.value)}
                   placeholder="Minimum 8 characters"
+                  className="bg-white"
                 />
               </div>
-              <div>
-                <Label htmlFor="adminConfirmPassword">Confirm Password *</Label>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="adminConfirmPassword"
+                  className="text-foreground"
+                >
+                  Confirm Password *
+                </Label>
                 <Input
                   id="adminConfirmPassword"
                   type="password"
@@ -485,6 +530,7 @@ export default function RegisterPage() {
                     updateField("adminConfirmPassword", e.target.value)
                   }
                   placeholder="Re-enter password"
+                  className="bg-white"
                 />
               </div>
             </div>
@@ -496,12 +542,12 @@ export default function RegisterPage() {
                 <h3 className="text-lg font-semibold text-purple-900 mb-2">
                   7-Day Free Trial
                 </h3>
-                <p className="text-sm text-purple-700 mb-4">
+                <p className="text-sm text-purple-800 mb-4">
                   Your trial starts today and ends in 7 days. No charges will be
                   made during your trial period.
                 </p>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-purple-700">Trial Period:</span>
+                  <span className="text-purple-800">Trial Period:</span>
                   <span className="font-semibold text-purple-900">
                     {new Date().toLocaleDateString()} -{" "}
                     {new Date(
@@ -522,7 +568,10 @@ export default function RegisterPage() {
                     }
                     className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                   />
-                  <Label htmlFor="skipPayment" className="cursor-pointer">
+                  <Label
+                    htmlFor="skipPayment"
+                    className="cursor-pointer text-foreground"
+                  >
                     Skip payment setup for now
                   </Label>
                 </div>
@@ -534,29 +583,38 @@ export default function RegisterPage() {
                       subscription when your trial ends. You won't be charged
                       until then.
                     </p>
-                    <div>
-                      <Label htmlFor="cardNumber">Card Number</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="cardNumber" className="text-foreground">
+                        Card Number
+                      </Label>
                       <Input
                         id="cardNumber"
                         placeholder="1234 5678 9012 3456"
                         disabled={isSubmitting}
+                        className="bg-white"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiry">Expiry Date</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="expiry" className="text-foreground">
+                          Expiry Date
+                        </Label>
                         <Input
                           id="expiry"
                           placeholder="MM/YY"
                           disabled={isSubmitting}
+                          className="bg-white"
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="cvc">CVC</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="cvc" className="text-foreground">
+                          CVC
+                        </Label>
                         <Input
                           id="cvc"
                           placeholder="123"
                           disabled={isSubmitting}
+                          className="bg-white"
                         />
                       </div>
                     </div>
@@ -576,18 +634,29 @@ export default function RegisterPage() {
           )}
 
           <div className="flex justify-between mt-8">
-            {step > 1 && (
+            {step === 1 ? (
               <Button
-                variant="outline"
+                variant="secondary"
+                onClick={() => router.push("/login")}
+                disabled={isSubmitting}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-900 cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Back to Login
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
                 onClick={handleBack}
                 disabled={isSubmitting}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-900 cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
             )}
             {step < 3 ? (
-              <Button onClick={handleNext} className="ml-auto">
+              <Button onClick={handleNext} className="ml-auto cursor-pointer">
                 Next
                 <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
@@ -595,7 +664,7 @@ export default function RegisterPage() {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="ml-auto"
+                className="ml-auto cursor-pointer"
               >
                 {isSubmitting ? "Creating Account..." : "Start Free Trial"}
               </Button>

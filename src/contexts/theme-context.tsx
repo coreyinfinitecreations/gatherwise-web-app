@@ -19,12 +19,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const pathname = usePathname();
 
-  const isLoginPage = pathname === "/login";
+  const isAuthPage = pathname === "/login" || pathname === "/register";
 
   useEffect(() => {
     setMounted(true);
 
-    if (isLoginPage) {
+    if (isAuthPage) {
       setTheme("light");
       return;
     }
@@ -39,7 +39,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else if (prefersDark) {
       setTheme("dark");
     }
-  }, [isLoginPage]);
+  }, [isAuthPage]);
 
   useEffect(() => {
     if (!mounted || !user) return;
@@ -71,7 +71,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
 
     const root = document.documentElement;
-    if (isLoginPage) {
+    if (isAuthPage) {
       root.classList.remove("dark");
       return;
     }
@@ -95,7 +95,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         console.error("Failed to save theme preference:", error);
       });
     }
-  }, [theme, mounted, user, isLoginPage]);
+  }, [theme, mounted, user, isAuthPage]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
