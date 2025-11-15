@@ -34,6 +34,7 @@ export function DashboardHeader() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [hasMultipleCampuses, setHasMultipleCampuses] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserSettings = async () => {
@@ -56,6 +57,28 @@ export function DashboardHeader() {
     };
 
     fetchUserSettings();
+  }, [user?.id]);
+
+  // Load profile image from localStorage
+  useEffect(() => {
+    if (user?.id) {
+      const storedImage = localStorage.getItem(`profileImage_${user.id}`);
+      setProfileImage(storedImage);
+    }
+  }, [user?.id]);
+
+  // Listen for profile image changes
+  useEffect(() => {
+    const handleProfileImageChange = (event: CustomEvent) => {
+      if (event.detail.userId === user?.id) {
+        setProfileImage(event.detail.image);
+      }
+    };
+
+    window.addEventListener('profileImageChanged', handleProfileImageChange as EventListener);
+    return () => {
+      window.removeEventListener('profileImageChanged', handleProfileImageChange as EventListener);
+    };
   }, [user?.id]);
 
   const getInitials = (name: string) => {
@@ -164,13 +187,16 @@ export function DashboardHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10">
-                <AvatarImage
-                  src="/avatars/pastor-john.jpg"
-                  alt={user?.name || "User"}
-                />
-                <AvatarFallback className="bg-primary text-white">
-                  {user?.name ? getInitials(user.name) : "U"}
-                </AvatarFallback>
+                {profileImage ? (
+                  <AvatarImage
+                    src={profileImage}
+                    alt={user?.name || "User"}
+                  />
+                ) : (
+                  <AvatarFallback className="bg-primary dark:bg-[#312e81] text-white">
+                    {user?.name ? getInitials(user.name) : "U"}
+                  </AvatarFallback>
+                )}
               </Avatar>
             </Button>
           </DropdownMenuTrigger>

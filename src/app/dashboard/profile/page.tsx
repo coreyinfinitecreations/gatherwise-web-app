@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ImageCropModal } from "@/components/profile/image-crop-modal";
 import {
   User,
   Mail,
@@ -40,6 +41,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -49,6 +52,16 @@ export default function ProfilePage() {
     state: "",
     zipCode: "",
   });
+
+  // Load profile image from localStorage on mount
+  useEffect(() => {
+    if (user?.id) {
+      const storedImage = localStorage.getItem(`profileImage_${user.id}`);
+      if (storedImage) {
+        setProfileImage(storedImage);
+      }
+    }
+  }, [user?.id]);
 
   // Fetch profile data
   const { data: profileData, isLoading } = useQuery({
@@ -151,7 +164,34 @@ export default function ProfilePage() {
     }
     setIsEditing(false);
     setError("");
-    setSuccess("");
+  };
+
+  const handleSaveProfileImage = (croppedImage: string) => {
+    setProfileImage(croppedImage);
+    // Save to localStorage
+    if (user?.id) {
+      localStorage.setItem(`profileImage_${user.id}`, croppedImage);
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('profileImageChanged', { 
+        detail: { userId: user.id, image: croppedImage } 
+      }));
+    }
+    setSuccess("Profile picture updated!");
+    setTimeout(() => setSuccess(""), 3000);
+  };
+
+  const handleRemoveImage = () => {
+    setProfileImage(null);
+    // Remove from localStorage
+    if (user?.id) {
+      localStorage.removeItem(`profileImage_${user.id}`);
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('profileImageChanged', { 
+        detail: { userId: user.id, image: null } 
+      }));
+    }
+    setSuccess("Profile picture removed");
+    setTimeout(() => setSuccess(""), 3000);
   };
 
   const getInitials = (name: string) => {
@@ -229,22 +269,51 @@ export default function ProfilePage() {
               <CardContent className="pt-6">
                 <div className="flex items-start gap-6">
                   {/* Avatar */}
-                  <div className="relative">
+                  <div className="relative flex flex-col items-center gap-2">
                     <Avatar className="h-24 w-24">
-                      <AvatarFallback className="text-2xl">
-                        {user?.name ? getInitials(user.name) : "U"}
-                      </AvatarFallback>
+                      {profileImage ? (
+                        <AvatarImage
+                          src={profileImage}
+                          alt={user?.name || "Profile"}
+                        />
+                      ) : (
+                        <AvatarFallback className="text-2xl bg-primary dark:bg-[#312e81] text-white">
+                          {user?.name ? getInitials(user.name) : "U"}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
-                    {isEditing && (
+                    <>
                       <Button
-                        size="icon"
-                        variant="secondary"
-                        className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
+                        size="sm"
+                        variant="ghost"
+                        className="gap-2 text-muted-foreground hover:text-foreground"
+                        onClick={() => setIsImageModalOpen(true)}
                       >
                         <Camera className="h-4 w-4" />
+                        <span className="text-xs">
+                          {profileImage ? "Change Photo" : "Add Photo"}
+                        </span>
                       </Button>
-                    )}
+                      {profileImage && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-2 text-destructive hover:text-destructive"
+                          onClick={handleRemoveImage}
+                        >
+                          <X className="h-3 w-3" />
+                          <span className="text-xs">Remove</span>
+                        </Button>
+                      )}
+                    </>
                   </div>
+
+                  {/* Image Crop Modal */}
+                  <ImageCropModal
+                    isOpen={isImageModalOpen}
+                    onClose={() => setIsImageModalOpen(false)}
+                    onSave={handleSaveProfileImage}
+                  />
 
                   {/* Basic Info */}
                   <div className="flex-1">
@@ -275,7 +344,9 @@ export default function ProfilePage() {
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <User className="h-4 w-4" />
-                        <span>ID: {user?.organizationId || "N/A"}</span>
+                        <span>
+                          Organization ID: {user?.organizationId || "N/A"}
+                        </span>
                       </div>
                     </div>
                   </div>
