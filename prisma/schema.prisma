@@ -89,6 +89,7 @@ model Church {
   email                   String?
   website                 String?
   observesChurchMembership Boolean       @default(true)
+  hasMultipleCampuses     Boolean        @default(false)
   trialEndsAt             DateTime?
   subscriptionStatus      String         @default("trial")
   stripeCustomerId        String?

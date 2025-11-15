@@ -52,6 +52,55 @@ export default function OnboardingPage() {
     },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationData, setRegistrationData] = useState<{
+    hasMultipleCampuses?: boolean;
+    observesChurchMembership?: boolean;
+  }>({});
+
+  useEffect(() => {
+    const fetchChurchData = async () => {
+      try {
+        const churchId = await getChurchId();
+        if (churchId) {
+          const response = await fetch(`/api/churches/${churchId}`, {
+            headers: {
+              "x-user-id": user?.id || "",
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setRegistrationData({
+              hasMultipleCampuses: data.church?.hasMultipleCampuses,
+              observesChurchMembership: data.church?.observesChurchMembership,
+            });
+
+            if (data.church?.observesChurchMembership !== undefined) {
+              setObservesMembership(
+                data.church.observesChurchMembership ? "yes" : "no"
+              );
+            }
+
+            if (data.church?.hasMultipleCampuses !== undefined) {
+              setHasMultipleCampuses(
+                data.church.hasMultipleCampuses ? "yes" : "no"
+              );
+
+              if (data.church.hasMultipleCampuses) {
+                setStep(2);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching church data:", error);
+      }
+    };
+
+    if (user?.id) {
+      fetchChurchData();
+    }
+  }, [user?.id]);
 
   const updateCampus = (
     index: number,
@@ -103,21 +152,24 @@ export default function OnboardingPage() {
         );
       }
 
-      // Update church membership preference
-      const churchResponse = await fetch(`/api/churches/${churchId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-id": user?.id || "",
-        },
-        body: JSON.stringify({
-          observesChurchMembership: observesMembership === "yes",
-        }),
-      });
+      if (registrationData.observesChurchMembership === undefined) {
+        const churchResponse = await fetch(`/api/churches/${churchId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "x-user-id": user?.id || "",
+          },
+          body: JSON.stringify({
+            observesChurchMembership: observesMembership === "yes",
+          }),
+        });
 
-      if (!churchResponse.ok) {
-        const errorData = await churchResponse.json();
-        throw new Error(errorData.error || "Failed to update church settings");
+        if (!churchResponse.ok) {
+          const errorData = await churchResponse.json();
+          throw new Error(
+            errorData.error || "Failed to update church settings"
+          );
+        }
       }
 
       if (hasMultipleCampuses === "yes") {
@@ -158,7 +210,6 @@ export default function OnboardingPage() {
           "x-user-id": user?.id || "",
         },
         body: JSON.stringify({
-          hasMultipleCampuses: hasMultipleCampuses === "yes",
           onboardingCompleted: true,
         }),
       });
@@ -209,10 +260,10 @@ export default function OnboardingPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Welcome to Gatherwise!</CardTitle>
           <CardDescription>
-            Let's set up your church management system
+            Let's finish setting up your church management system
           </CardDescription>
           <div className="flex gap-2 mt-4">
-            {[1, 2, 3, 4].map((s) => (
+            {[1, 2, 3].map((s) => (
               <div
                 key={s}
                 className={`flex-1 h-2 rounded-full ${
@@ -230,38 +281,39 @@ export default function OnboardingPage() {
             </Alert>
           )}
 
-          {step === 1 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">
-                Does your church observe church membership?
-              </h3>
-              <RadioGroup
-                value={observesMembership}
-                onValueChange={setObservesMembership}
-              >
-                <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-muted/50">
-                  <RadioGroupItem value="yes" id="membership-yes" />
-                  <Label
-                    htmlFor="membership-yes"
-                    className="flex-1 cursor-pointer"
-                  >
-                    Yes, we have formal church membership
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-muted/50">
-                  <RadioGroupItem value="no" id="membership-no" />
-                  <Label
-                    htmlFor="membership-no"
-                    className="flex-1 cursor-pointer"
-                  >
-                    No, we track regular attendees
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-          )}
+          {step === 1 &&
+            registrationData.observesChurchMembership === undefined && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">
+                  Does your church observe church membership?
+                </h3>
+                <RadioGroup
+                  value={observesMembership}
+                  onValueChange={setObservesMembership}
+                >
+                  <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-muted/50">
+                    <RadioGroupItem value="yes" id="membership-yes" />
+                    <Label
+                      htmlFor="membership-yes"
+                      className="flex-1 cursor-pointer"
+                    >
+                      Yes, we have formal church membership
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-muted/50">
+                    <RadioGroupItem value="no" id="membership-no" />
+                    <Label
+                      htmlFor="membership-no"
+                      className="flex-1 cursor-pointer"
+                    >
+                      No, we track regular attendees
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
 
-          {step === 2 && (
+          {step === 2 && registrationData.hasMultipleCampuses === undefined && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">
                 Does your church have multiple campuses?
@@ -286,7 +338,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {step === 3 && hasMultipleCampuses === "yes" && (
+          {((step === 2 && registrationData.hasMultipleCampuses === true) ||
+            (step === 3 && hasMultipleCampuses === "yes")) && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">
                 How many total campuses do you have?
@@ -313,7 +366,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {step === 3 && hasMultipleCampuses === "no" && (
+          {((step === 2 && registrationData.hasMultipleCampuses === false) ||
+            (step === 3 && hasMultipleCampuses === "no")) && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">
                 Great! We've created a default campus for you.
@@ -330,7 +384,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {step === 4 && hasMultipleCampuses === "yes" && (
+          {((step === 3 && registrationData.hasMultipleCampuses === true) ||
+            (step === 4 && hasMultipleCampuses === "yes")) && (
             <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
               <div>
                 <h3 className="text-lg font-semibold">
@@ -490,27 +545,44 @@ export default function OnboardingPage() {
                 Back
               </Button>
             )}
-            {step < 4 && !(step === 3 && hasMultipleCampuses === "no") && (
-              <Button
-                onClick={() => setStep(step + 1)}
-                disabled={
-                  (step === 1 && !observesMembership) ||
-                  (step === 2 && !hasMultipleCampuses) ||
-                  (step === 3 && hasMultipleCampuses === "yes" && !campusCount)
-                }
-                className="ml-auto"
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
-            )}
-            {((step === 3 && hasMultipleCampuses === "no") || step === 4) && (
+            {step < 3 &&
+              !(
+                (step === 2 &&
+                  registrationData.hasMultipleCampuses === false) ||
+                (step === 3 && hasMultipleCampuses === "no")
+              ) && (
+                <Button
+                  onClick={() => setStep(step + 1)}
+                  disabled={
+                    (step === 1 &&
+                      registrationData.observesChurchMembership === undefined &&
+                      !observesMembership) ||
+                    (step === 2 &&
+                      registrationData.hasMultipleCampuses === undefined &&
+                      !hasMultipleCampuses) ||
+                    (((step === 2 &&
+                      registrationData.hasMultipleCampuses === true) ||
+                      (step === 3 && hasMultipleCampuses === "yes")) &&
+                      !campusCount)
+                  }
+                  className="ml-auto"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              )}
+            {((step === 2 && registrationData.hasMultipleCampuses === false) ||
+              (step === 3 && hasMultipleCampuses === "no") ||
+              (step === 3 && registrationData.hasMultipleCampuses === true) ||
+              step === 4) && (
               <Button
                 onClick={handleComplete}
                 disabled={
-                  !observesMembership ||
                   isSubmitting ||
-                  (hasMultipleCampuses === "yes" &&
+                  (registrationData.observesChurchMembership === undefined &&
+                    !observesMembership) ||
+                  ((hasMultipleCampuses === "yes" ||
+                    registrationData.hasMultipleCampuses === true) &&
                     !campuses.every(
                       (c) =>
                         c.name && c.address && c.city && c.state && c.zipCode

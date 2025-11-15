@@ -2,6 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+async function generateUniqueOrganizationId(): Promise<string> {
+  const year = new Date().getFullYear();
+  let orgId: string;
+  let attempts = 0;
+  const maxAttempts = 100;
+
+  do {
+    const random = Math.random().toString(36).substr(2, 9).toUpperCase();
+    orgId = `GW-${year}-${random}`;
+    attempts++;
+
+    if (attempts >= maxAttempts) {
+      throw new Error("Unable to generate unique organization ID");
+    }
+
+    const existing = await prisma.church.findUnique({
+      where: { id: orgId },
+    });
+
+    if (!existing) break;
+  } while (true);
+
+  return orgId;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -59,9 +84,11 @@ export async function POST(request: NextRequest) {
     trialEndsAt.setDate(trialEndsAt.getDate() + 7);
 
     const campusName = church.campusName || "Main Campus";
+    const organizationId = await generateUniqueOrganizationId();
 
-    const newChurch = await prisma.church.create({
+    const newChurch = (await prisma.church.create({
       data: {
+        id: organizationId,
         name: church.name,
         description: church.description,
         address: `${church.address}, ${church.city}, ${church.state} ${church.zipCode}`,
@@ -73,6 +100,7 @@ export async function POST(request: NextRequest) {
         stripeCustomerId: null,
         stripeSubscriptionId: null,
         paymentMethod: skipPayment ? null : "pending",
+        hasMultipleCampuses: church.hasMultipleCampuses || false,
         campuses: {
           create: {
             name: campusName,
@@ -87,7 +115,7 @@ export async function POST(request: NextRequest) {
       include: {
         campuses: true,
       },
-    }) as any;
+    })) as any;
 
     const mainCampus = newChurch.campuses[0];
 
