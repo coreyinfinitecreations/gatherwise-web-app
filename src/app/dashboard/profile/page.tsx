@@ -329,9 +329,26 @@ export default function ProfilePage() {
                 <h1 className="text-3xl font-bold">{user?.name}</h1>
                 <p className="text-muted-foreground">{user?.email}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="outline" className="gap-1">
+                  <Badge
+                    variant="outline"
+                    className={`gap-1 ${
+                      user?.role === "SUPER_ADMIN"
+                        ? "bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600 text-amber-950 border-yellow-500 shadow-md font-semibold"
+                        : ""
+                    }`}
+                  >
                     <User className="h-3 w-3" />
-                    {user?.role}
+                    {user?.role === "SUPER_ADMIN"
+                      ? "Super Admin"
+                      : user?.role === "CHURCH_ADMIN"
+                      ? "Church Admin"
+                      : user?.role === "PASTOR"
+                      ? "Pastor"
+                      : user?.role === "LEADER"
+                      ? "Leader"
+                      : user?.role === "MEMBER"
+                      ? "Member"
+                      : user?.role}
                   </Badge>
                   {user?.organizationName && (
                     <Badge variant="outline" className="gap-1">
