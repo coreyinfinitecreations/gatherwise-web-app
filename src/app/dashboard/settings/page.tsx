@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
+import { toast } from "react-toastify";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -40,7 +42,10 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function SettingsPage() {
   const { user, updateUser } = useAuth();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [passkeys, setPasskeys] = useState<PasskeyCredential[]>([]);
+  const [churchId, setChurchId] = useState<string>("");
   const [capabilities, setCapabilities] = useState({
     isSupported: false,
     isPlatformAuthenticatorAvailable: false,
@@ -53,12 +58,37 @@ export default function SettingsPage() {
   const [isEditingOrg, setIsEditingOrg] = useState(false);
   const [isSavingOrg, setIsSavingOrg] = useState(false);
 
+  const currentTab = searchParams.get("tab") || "security";
+
   useEffect(() => {
     loadSecurityData();
     if (user?.organizationName) {
       setOrganizationName(user.organizationName);
     }
+    if (user?.id) {
+      fetchChurchId();
+    }
   }, [user]);
+
+  const fetchChurchId = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch("/api/churches", {
+        headers: {
+          "x-user-id": user.id,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.churches && data.churches.length > 0) {
+          setChurchId(data.churches[0].id);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching church ID:", error);
+    }
+  };
 
   const loadSecurityData = async () => {
     try {
@@ -217,7 +247,19 @@ export default function SettingsPage() {
         )}
 
         {/* Tabs */}
-        <Tabs defaultValue="security" className="space-y-6">
+        <Tabs 
+          value={currentTab}
+          className="space-y-6"
+          onValueChange={(value) => {
+            if (value === "team") {
+              router.push("/dashboard/settings/roles");
+            } else if (value === "organization") {
+              router.push("/dashboard/settings/organization");
+            } else if (value === "security") {
+              router.push("/dashboard/settings");
+            }
+          }}
+        >
           <TabsList>
             <TabsTrigger value="security" className="gap-2">
               <Shield className="h-4 w-4" />
@@ -547,31 +589,6 @@ export default function SettingsPage() {
                     Campus management features will be available here. You can
                     enable or disable multi-campus mode and manage
                     campus-specific settings.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Team & Roles Tab */}
-          <TabsContent value="team" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Team Members
-                </CardTitle>
-                <CardDescription>
-                  Manage team members and their roles
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    Team and role management features will be available here.
-                    Invite team members and assign roles like Admin, Pastor,
-                    Leader, etc.
                   </AlertDescription>
                 </Alert>
               </CardContent>

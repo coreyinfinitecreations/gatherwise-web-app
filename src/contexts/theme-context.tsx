@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./auth-context";
+import { usePathname } from "next/navigation";
 
 type Theme = "light" | "dark";
 
@@ -16,9 +17,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
+  const pathname = usePathname();
+
+  const isLoginPage = pathname === "/login";
 
   useEffect(() => {
     setMounted(true);
+    
+    if (isLoginPage) {
+      setTheme("light");
+      return;
+    }
+    
     const savedTheme = localStorage.getItem("theme") as Theme | null;
     const prefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)"
@@ -29,7 +39,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else if (prefersDark) {
       setTheme("dark");
     }
-  }, []);
+  }, [isLoginPage]);
 
   useEffect(() => {
     if (!mounted || !user) return;
@@ -61,6 +71,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
 
     const root = document.documentElement;
+    if (isLoginPage) {
+      root.classList.remove("dark");
+      return;
+    }
+    
     if (theme === "dark") {
       root.classList.add("dark");
     } else {
@@ -80,7 +95,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         console.error("Failed to save theme preference:", error);
       });
     }
-  }, [theme, mounted, user]);
+  }, [theme, mounted, user, isLoginPage]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));

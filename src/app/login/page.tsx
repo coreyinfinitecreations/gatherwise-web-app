@@ -44,6 +44,7 @@ function LoginPageContent() {
 
   useEffect(() => {
     document.documentElement.classList.remove("dark");
+    document.body.classList.remove("dark");
   }, []);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -260,7 +261,7 @@ function LoginPageContent() {
           onError={(error) => setError(error)}
         />
         {/* Login Form */}
-        <Card>
+        <Card className="bg-white dark:bg-white">
           <CardHeader>
             <CardTitle>Sign In</CardTitle>
             <CardDescription>
