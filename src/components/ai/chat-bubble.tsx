@@ -12,8 +12,10 @@ import {
   Minimize2,
   Maximize2,
   GripVertical,
+  Maximize,
 } from "lucide-react";
 import { useAIChat } from "@/contexts/ai-chat-context";
+import { useRouter, usePathname } from "next/navigation";
 
 interface Message {
   id: string;
@@ -24,6 +26,8 @@ interface Message {
 
 export function AIChatBubble() {
   const { isVisible } = useAIChat();
+  const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -263,7 +267,7 @@ export function AIChatBubble() {
     }
   };
 
-  if (!shouldRender) return null;
+  if (!shouldRender || pathname === "/dashboard/ai-assistant") return null;
 
   if (!isOpen) {
     return (
@@ -355,6 +359,15 @@ export function AIChatBubble() {
               ) : (
                 <Minimize2 className="h-4 w-4" />
               )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/dashboard/ai-assistant")}
+              className="h-8 w-8"
+              title="Open in full page"
+            >
+              <Maximize className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"

@@ -29,6 +29,7 @@ import {
   Church,
   Heart,
   MapPin,
+  Sparkles,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -83,6 +84,11 @@ const baseNavigation: NavigationItem[] = [
       { title: "Email Campaigns", url: "/dashboard/communication/email" },
       { title: "Announcements", url: "/dashboard/communication/announcements" },
     ],
+  },
+  {
+    title: "AI Assistant",
+    url: "/dashboard/ai-assistant",
+    icon: Sparkles,
   },
 ];
 
