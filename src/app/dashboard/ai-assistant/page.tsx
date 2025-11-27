@@ -30,16 +30,18 @@ export default function AIAssistantPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
+    null
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const animateText = async (text: string, messageId: string) => {
-    const words = text.split(' ');
-    let currentText = '';
-    
+    const words = text.split(" ");
+    let currentText = "";
+
     for (let i = 0; i < words.length; i++) {
-      currentText += (i > 0 ? ' ' : '') + words[i];
-      
+      currentText += (i > 0 ? " " : "") + words[i];
+
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === messageId
@@ -47,15 +49,15 @@ export default function AIAssistantPage() {
             : msg
         )
       );
-      
-      await new Promise((resolve) => setTimeout(resolve, 30 + Math.random() * 20));
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, 30 + Math.random() * 20)
+      );
     }
 
     setMessages((prev) =>
       prev.map((msg) =>
-        msg.id === messageId
-          ? { ...msg, isStreaming: false }
-          : msg
+        msg.id === messageId ? { ...msg, isStreaming: false } : msg
       )
     );
     setStreamingMessageId(null);
@@ -77,7 +79,7 @@ export default function AIAssistantPage() {
 
     const assistantMessageId = `assistant-${Date.now()}`;
     setStreamingMessageId(assistantMessageId);
-    
+
     const placeholderMessage: Message = {
       id: assistantMessageId,
       role: "assistant",
@@ -85,7 +87,7 @@ export default function AIAssistantPage() {
       timestamp: new Date(),
       isStreaming: true,
     };
-    
+
     setMessages((prev) => [...prev, placeholderMessage]);
 
     try {
@@ -295,28 +297,30 @@ export default function AIAssistantPage() {
                             <span className="inline-block w-2 h-5 bg-primary ml-1 animate-pulse" />
                           )}
                         </p>
-                        {message.role === "assistant" && !message.isStreaming && message.content && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="mt-2 h-8"
-                            onClick={() =>
-                              handleCopy(message.content, message.id)
-                            }
-                          >
-                            {copiedId === message.id ? (
-                              <>
-                                <Check className="h-3 w-3 mr-1" />
-                                Copied
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="h-3 w-3 mr-1" />
-                                Copy
-                              </>
-                            )}
-                          </Button>
-                        )}
+                        {message.role === "assistant" &&
+                          !message.isStreaming &&
+                          message.content && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="mt-2 h-8"
+                              onClick={() =>
+                                handleCopy(message.content, message.id)
+                              }
+                            >
+                              {copiedId === message.id ? (
+                                <>
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Copied
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="h-3 w-3 mr-1" />
+                                  Copy
+                                </>
+                              )}
+                            </Button>
+                          )}
                       </div>
                     </div>
                   </div>
