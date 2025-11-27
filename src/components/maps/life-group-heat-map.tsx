@@ -317,65 +317,109 @@ export function LifeGroupHeatMap({
         dataLayer.revertStyle();
       });
 
-      const query = `https://public.opendatasoft.com/api/records/1.0/search/?dataset=us-zip-code-latitude-and-longitude&q=&rows=200&geofilter.bbox=${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()}&fields=zip,geopoint,geoshape`;
-
-      fetch(query)
+      fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&city=${encodeURIComponent(cityName)}&country=us`,
+        {
+          headers: {
+            "User-Agent": "Gatherwise Church Management App",
+          },
+        }
+      )
         .then((response) => {
-          if (!response.ok) throw new Error("Failed to fetch ZIP codes");
+          if (!response.ok) throw new Error("Failed to fetch city info");
           return response.json();
         })
-        .then((data) => {
-          console.log(
-            `Loaded ${data.records?.length || 0} ZIP codes with boundaries`
+        .then((cityData) => {
+          if (!cityData || cityData.length === 0) {
+            console.warn("No city data found");
+            return;
+          }
+
+          const cityBbox = cityData[0].boundingbox;
+          const cityBounds = new google.maps.LatLngBounds(
+            new google.maps.LatLng(parseFloat(cityBbox[0]), parseFloat(cityBbox[2])),
+            new google.maps.LatLng(parseFloat(cityBbox[1]), parseFloat(cityBbox[3]))
           );
 
-          const newLabels: google.maps.Marker[] = [];
+          return fetch(
+            `https://raw.githubusercontent.com/OpenDataDE/State-zip-code-GeoJSON/master/tn_tennessee_zip_codes_geo.min.json`
+          )
+            .then((response) => {
+              if (!response.ok) throw new Error("Failed to fetch ZIP codes");
+              return response.json();
+            })
+            .then((geoJsonData) => {
+              console.log(
+                `Loaded ${geoJsonData.features?.length || 0} ZIP codes for Tennessee`
+              );
 
-          data.records?.forEach((record: any) => {
-            const zipCode = record.fields.zip;
-            const geopoint = record.fields.geopoint;
-            const geoshape = record.fields.geoshape;
+              const newLabels: google.maps.Marker[] = [];
 
-            if (!zipCode) return;
+              geoJsonData.features?.forEach((feature: any) => {
+                const zipCode = feature.properties.ZCTA5CE10 || feature.properties.GEOID10 || feature.properties.name;
+                
+                if (!zipCode) return;
 
-            if (geoshape?.coordinates) {
-              try {
-                const geoJson = {
-                  type: "Feature",
-                  properties: { zip: zipCode },
-                  geometry: geoshape,
-                };
-                dataLayer.addGeoJson(geoJson);
-              } catch (e) {
-                console.warn(`Failed to add ZIP ${zipCode} boundary:`, e);
-              }
-            }
+                const geometry = feature.geometry;
+                if (geometry) {
+                  try {
+                    const geometryBounds = new google.maps.LatLngBounds();
+                    
+                    const processCoordinates = (coords: any) => {
+                      if (Array.isArray(coords[0])) {
+                        coords.forEach((c: any) => processCoordinates(c));
+                      } else {
+                        geometryBounds.extend(new google.maps.LatLng(coords[1], coords[0]));
+                      }
+                    };
 
-            if (geopoint) {
-              const [lat, lng] = geopoint;
-              const label = new google.maps.Marker({
-                position: { lat, lng },
-                map: map,
-                icon: {
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 0,
-                },
-                label: {
-                  text: zipCode.toString(),
-                  color: "#1e40af",
-                  fontSize: "13px",
-                  fontWeight: "bold",
-                },
-                clickable: false,
-                zIndex: 100,
+                    if (geometry.type === "Polygon") {
+                      processCoordinates(geometry.coordinates[0]);
+                    } else if (geometry.type === "MultiPolygon") {
+                      geometry.coordinates.forEach((polygon: any) => {
+                        processCoordinates(polygon[0]);
+                      });
+                    }
+
+                    const zipCenter = geometryBounds.getCenter();
+                    
+                    if (cityBounds.contains(zipCenter)) {
+                      dataLayer.addGeoJson({
+                        type: "Feature",
+                        properties: { zip: zipCode },
+                        geometry: geometry,
+                      });
+
+                      const label = new google.maps.Marker({
+                        position: zipCenter,
+                        map: map,
+                        icon: {
+                          path: google.maps.SymbolPath.CIRCLE,
+                          scale: 0,
+                        },
+                        label: {
+                          text: zipCode.toString(),
+                          color: "#1e3a8a",
+                          fontSize: "16px",
+                          fontWeight: "700",
+                          className: "zip-label",
+                        },
+                        clickable: false,
+                        zIndex: 1000,
+                      });
+
+                      newLabels.push(label);
+                    }
+                  } catch (e) {
+                    console.warn(`Failed to add ZIP ${zipCode} boundary:`, e);
+                  }
+                }
               });
 
-              newLabels.push(label);
-            }
-          });
-
-          setZipCodeLabels(newLabels);
-          setZipDataLayer(dataLayer);
+              console.log(`Filtered to ${newLabels.length} ZIP codes in ${cityName}`);
+              setZipCodeLabels(newLabels);
+              setZipDataLayer(dataLayer);
+            });
         })
         .catch((error) => {
           console.error("Error loading ZIP codes:", error);
