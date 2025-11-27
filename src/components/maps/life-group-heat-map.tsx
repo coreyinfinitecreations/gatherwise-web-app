@@ -318,7 +318,9 @@ export function LifeGroupHeatMap({
       });
 
       fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&city=${encodeURIComponent(cityName)}&country=us`,
+        `https://nominatim.openstreetmap.org/search?format=json&city=${encodeURIComponent(
+          cityName
+        )}&country=us`,
         {
           headers: {
             "User-Agent": "Gatherwise Church Management App",
@@ -337,8 +339,14 @@ export function LifeGroupHeatMap({
 
           const cityBbox = cityData[0].boundingbox;
           const cityBounds = new google.maps.LatLngBounds(
-            new google.maps.LatLng(parseFloat(cityBbox[0]), parseFloat(cityBbox[2])),
-            new google.maps.LatLng(parseFloat(cityBbox[1]), parseFloat(cityBbox[3]))
+            new google.maps.LatLng(
+              parseFloat(cityBbox[0]),
+              parseFloat(cityBbox[2])
+            ),
+            new google.maps.LatLng(
+              parseFloat(cityBbox[1]),
+              parseFloat(cityBbox[3])
+            )
           );
 
           return fetch(
@@ -350,26 +358,33 @@ export function LifeGroupHeatMap({
             })
             .then((geoJsonData) => {
               console.log(
-                `Loaded ${geoJsonData.features?.length || 0} ZIP codes for Tennessee`
+                `Loaded ${
+                  geoJsonData.features?.length || 0
+                } ZIP codes for Tennessee`
               );
 
               const newLabels: google.maps.Marker[] = [];
 
               geoJsonData.features?.forEach((feature: any) => {
-                const zipCode = feature.properties.ZCTA5CE10 || feature.properties.GEOID10 || feature.properties.name;
-                
+                const zipCode =
+                  feature.properties.ZCTA5CE10 ||
+                  feature.properties.GEOID10 ||
+                  feature.properties.name;
+
                 if (!zipCode) return;
 
                 const geometry = feature.geometry;
                 if (geometry) {
                   try {
                     const geometryBounds = new google.maps.LatLngBounds();
-                    
+
                     const processCoordinates = (coords: any) => {
                       if (Array.isArray(coords[0])) {
                         coords.forEach((c: any) => processCoordinates(c));
                       } else {
-                        geometryBounds.extend(new google.maps.LatLng(coords[1], coords[0]));
+                        geometryBounds.extend(
+                          new google.maps.LatLng(coords[1], coords[0])
+                        );
                       }
                     };
 
@@ -382,7 +397,7 @@ export function LifeGroupHeatMap({
                     }
 
                     const zipCenter = geometryBounds.getCenter();
-                    
+
                     if (cityBounds.contains(zipCenter)) {
                       dataLayer.addGeoJson({
                         type: "Feature",
@@ -416,7 +431,9 @@ export function LifeGroupHeatMap({
                 }
               });
 
-              console.log(`Filtered to ${newLabels.length} ZIP codes in ${cityName}`);
+              console.log(
+                `Filtered to ${newLabels.length} ZIP codes in ${cityName}`
+              );
               setZipCodeLabels(newLabels);
               setZipDataLayer(dataLayer);
             });
