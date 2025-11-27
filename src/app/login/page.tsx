@@ -48,7 +48,7 @@ export default function LoginPage() {
             Welcome Back
           </CardTitle>
           <CardDescription className="text-base">
-            Sign in to your Gatherwise account
+            Sign in to your Gatherflow account
           </CardDescription>
         </CardHeader>
         <CardContent>

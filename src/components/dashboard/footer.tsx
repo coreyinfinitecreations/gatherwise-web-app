@@ -12,7 +12,7 @@ export function DashboardFooter() {
   return (
     <footer className="sticky bottom-0 flex h-12 items-center justify-between border-t bg-background px-6 text-sm text-muted-foreground z-10">
       <div className="flex items-center gap-4">
-        <span>© {new Date().getFullYear()} Gatherwise</span>
+        <span>© {new Date().getFullYear()} Gatherflow</span>
         <span className="text-xs">v1.0.0</span>
       </div>
 

@@ -1,3 +1,5 @@
+"use client";
+
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import {
   Card,
@@ -24,6 +26,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
@@ -36,112 +55,109 @@ import {
   Calendar,
   Users,
 } from "lucide-react";
+import { useState } from "react";
 
-const members = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    email: "sarah.johnson@email.com",
-    phone: "(555) 123-4567",
-    joinDate: "2024-03-15",
-    status: "Active",
-    groups: ["Young Adults", "Worship Team"],
-    pathway: "Leadership Development",
-    pathwayStep: 3,
-    pathwayTotal: 5,
-    avatar: "/avatars/sarah.jpg",
-  },
-  {
-    id: 2,
-    name: "Mike Chen",
-    email: "mike.chen@email.com",
-    phone: "(555) 234-5678",
-    joinDate: "2024-01-20",
-    status: "Active",
-    groups: ["Men's Ministry"],
-    pathway: "Membership Class",
-    pathwayStep: 2,
-    pathwayTotal: 3,
-    avatar: "/avatars/mike.jpg",
-  },
-  {
-    id: 3,
-    name: "Lisa Rodriguez",
-    email: "lisa.rodriguez@email.com",
-    phone: "(555) 345-6789",
-    joinDate: "2024-02-10",
-    status: "Active",
-    groups: ["Women's Bible Study", "Children's Ministry"],
-    pathway: "Newcomer Pathway",
-    pathwayStep: 4,
-    pathwayTotal: 4,
-    avatar: "/avatars/lisa.jpg",
-  },
-  {
-    id: 4,
-    name: "David Kim",
-    email: "david.kim@email.com",
-    phone: "(555) 456-7890",
-    joinDate: "2024-04-05",
-    status: "Visitor",
-    groups: [],
-    pathway: "Visitor Experience",
-    pathwayStep: 1,
-    pathwayTotal: 3,
-    avatar: "/avatars/david.jpg",
-  },
-];
+type PersonType = "Member" | "Staff" | "Visitor";
 
-const visitors = [
-  {
-    id: 1,
-    name: "Jennifer Adams",
-    email: "jennifer.adams@email.com",
-    visitDate: "2024-10-13",
-    followUpStatus: "Pending",
-    interests: ["Small Groups", "Volunteer Opportunities"],
-  },
-  {
-    id: 2,
-    name: "Robert Wilson",
-    email: "robert.wilson@email.com",
-    visitDate: "2024-10-06",
-    followUpStatus: "Contacted",
-    interests: ["Men's Ministry", "Bible Study"],
-  },
-];
+type UserRole = "SUPER_ADMIN" | "CHURCH_ADMIN" | "PASTOR" | "LEADER" | "MEMBER";
 
-const lifeGroups = [
-  {
-    id: 1,
-    name: "Young Adults",
-    leader: "Sarah Johnson",
-    members: 24,
-    meetingTime: "Fridays 7:00 PM",
-    location: "Church Building - Room 202",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Men's Ministry",
-    leader: "Pastor John",
-    members: 18,
-    meetingTime: "Saturdays 8:00 AM",
-    location: "Fellowship Hall",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Women's Bible Study",
-    leader: "Mary Thompson",
-    members: 32,
-    meetingTime: "Wednesdays 10:00 AM",
-    location: "Church Building - Room 105",
-    status: "Active",
-  },
-];
+interface Person {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  type: PersonType;
+  joinDate?: string;
+  visitDate?: string;
+  role?: string;
+  department?: string;
+  permission?: UserRole;
+  status?: string;
+  pathway?: string;
+  pathwayStep?: number;
+  pathwayTotal?: number;
+  interests?: string[];
+  groups?: string[];
+  avatar?: string;
+}
 
 export default function PeoplePage() {
+  const [people, setPeople] = useState<Person[]>([]);
+  const [filterType, setFilterType] = useState<
+    "all" | "members" | "visitors" | "staff"
+  >("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [newPerson, setNewPerson] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    type: "Member" as PersonType,
+    role: "",
+    department: "",
+    permission: "MEMBER" as UserRole,
+  });
+
+  const handleAddPerson = () => {
+    if (!newPerson.name || !newPerson.email) {
+      alert("Please fill in name and email");
+      return;
+    }
+
+    const person: Person = {
+      id: Date.now().toString(),
+      name: newPerson.name,
+      email: newPerson.email,
+      phone: newPerson.phone || undefined,
+      type: newPerson.type,
+      permission: newPerson.type === "Staff" ? newPerson.permission : "MEMBER",
+      ...(newPerson.type === "Member" && {
+        joinDate: new Date().toISOString().split("T")[0],
+        status: "Active",
+      }),
+      ...(newPerson.type === "Visitor" && {
+        visitDate: new Date().toISOString().split("T")[0],
+        status: "Pending",
+      }),
+      ...(newPerson.type === "Staff" && {
+        role: newPerson.role,
+        department: newPerson.department,
+        joinDate: new Date().toISOString().split("T")[0],
+      }),
+    };
+
+    setPeople([...people, person]);
+    setNewPerson({
+      name: "",
+      email: "",
+      phone: "",
+      type: "Member",
+      role: "",
+      department: "",
+      permission: "MEMBER",
+    });
+    setIsDialogOpen(false);
+  };
+
+  const filteredPeople = people
+    .filter((person) => {
+      if (filterType === "all") return true;
+      if (filterType === "members") return person.type === "Member";
+      if (filterType === "visitors") return person.type === "Visitor";
+      if (filterType === "staff") return person.type === "Staff";
+      return true;
+    })
+    .filter((person) => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        person.name.toLowerCase().includes(query) ||
+        person.email.toLowerCase().includes(query) ||
+        person.phone?.toLowerCase().includes(query)
+      );
+    });
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -150,320 +166,374 @@ export default function PeoplePage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">People</h1>
             <p className="text-muted-foreground">
-              Manage your church members, visitors, and life groups
+              Manage your church members, staff, and visitors
             </p>
           </div>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Member
-          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Person
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Add New Person</DialogTitle>
+                <DialogDescription>
+                  Add a new member, staff member, or visitor to your church
+                  directory.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="type">Person Type</Label>
+                  <Select
+                    value={newPerson.type}
+                    onValueChange={(value: PersonType) =>
+                      setNewPerson({ ...newPerson, type: value })
+                    }
+                  >
+                    <SelectTrigger id="type">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Member">Member</SelectItem>
+                      <SelectItem value="Visitor">Visitor</SelectItem>
+                      <SelectItem value="Staff">Staff</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="John Doe"
+                    value={newPerson.name}
+                    onChange={(e) =>
+                      setNewPerson({ ...newPerson, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="john@example.com"
+                    value={newPerson.email}
+                    onChange={(e) =>
+                      setNewPerson({ ...newPerson, email: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="phone">Phone (optional)</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="(555) 123-4567"
+                    value={newPerson.phone}
+                    onChange={(e) =>
+                      setNewPerson({ ...newPerson, phone: e.target.value })
+                    }
+                  />
+                </div>
+                {newPerson.type === "Staff" && (
+                  <>
+                    <div className="grid gap-2">
+                      <Label htmlFor="role">Role</Label>
+                      <Input
+                        id="role"
+                        placeholder="e.g., Youth Pastor"
+                        value={newPerson.role}
+                        onChange={(e) =>
+                          setNewPerson({ ...newPerson, role: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="department">Department</Label>
+                      <Input
+                        id="department"
+                        placeholder="e.g., Youth Ministry"
+                        value={newPerson.department}
+                        onChange={(e) =>
+                          setNewPerson({
+                            ...newPerson,
+                            department: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="permission">Permission Level</Label>
+                      <Select
+                        value={newPerson.permission}
+                        onValueChange={(value: UserRole) =>
+                          setNewPerson({ ...newPerson, permission: value })
+                        }
+                      >
+                        <SelectTrigger id="permission">
+                          <SelectValue placeholder="Select permission" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="MEMBER">Member</SelectItem>
+                          <SelectItem value="LEADER">Leader</SelectItem>
+                          <SelectItem value="PASTOR">Pastor</SelectItem>
+                          <SelectItem value="CHURCH_ADMIN">
+                            Church Admin
+                          </SelectItem>
+                          <SelectItem value="SUPER_ADMIN">
+                            Super Admin
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleAddPerson}>Add Person</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Search and Filters */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Search members..." className="pl-10" />
-              </div>
-              <Button variant="outline" className="gap-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
+          <Input
+            placeholder="Search people..."
+            className="pl-10 pr-12"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2"
+              >
                 <Filter className="h-4 w-4" />
-                Filters
               </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => setFilterType("all")}>
+                <div className="flex items-center justify-between w-full">
+                  <span>All People</span>
+                  {filterType === "all" && (
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                  )}
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterType("members")}>
+                <div className="flex items-center justify-between w-full">
+                  <span>Members</span>
+                  {filterType === "members" && (
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                  )}
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterType("visitors")}>
+                <div className="flex items-center justify-between w-full">
+                  <span>Visitors</span>
+                  {filterType === "visitors" && (
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                  )}
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterType("staff")}>
+                <div className="flex items-center justify-between w-full">
+                  <span>Staff</span>
+                  {filterType === "staff" && (
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                  )}
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="members" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="visitors">Visitors</TabsTrigger>
-            <TabsTrigger value="groups">Life Groups</TabsTrigger>
-          </TabsList>
-
-          {/* Members Tab */}
-          <TabsContent value="members">
-            <Card>
-              <CardHeader>
-                <CardTitle>Church Members</CardTitle>
-                <CardDescription>
-                  Manage your active church members and their pathway progress
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Member</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Groups</TableHead>
-                      <TableHead>Pathway Progress</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {members.map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={member.avatar} />
-                              <AvatarFallback>
-                                {member.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">{member.name}</div>
+        {/* People Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {filterType === "all" && "All People"}
+              {filterType === "members" && "Church Members"}
+              {filterType === "visitors" && "Recent Visitors"}
+              {filterType === "staff" && "Church Staff"}
+            </CardTitle>
+            <CardDescription>
+              {filterType === "all" &&
+                "View all members, staff, and visitors in one place"}
+              {filterType === "members" &&
+                "Manage your active church members and their pathway progress"}
+              {filterType === "visitors" &&
+                "Track and follow up with church visitors"}
+              {filterType === "staff" &&
+                "Manage your church staff members and leadership team"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {filteredPeople.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No people found</h3>
+                <p className="text-muted-foreground mb-4">
+                  {searchQuery
+                    ? "No results match your search. Try a different query."
+                    : "Get started by adding your first person to the directory."}
+                </p>
+                {!searchQuery && (
+                  <Button
+                    onClick={() => setIsDialogOpen(true)}
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Person
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Person</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPeople.map((person) => (
+                    <TableRow key={person.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={person.avatar} />
+                            <AvatarFallback>
+                              {person.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium">{person.name}</div>
+                            {person.joinDate && (
                               <div className="text-sm text-muted-foreground">
                                 Joined{" "}
-                                {new Date(member.joinDate).toLocaleDateString()}
+                                {new Date(person.joinDate).toLocaleDateString()}
                               </div>
-                            </div>
+                            )}
+                            {person.visitDate && (
+                              <div className="text-sm text-muted-foreground">
+                                Visited{" "}
+                                {new Date(
+                                  person.visitDate
+                                ).toLocaleDateString()}
+                              </div>
+                            )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-sm">
-                              <Mail className="h-3 w-3" />
-                              {member.email}
-                            </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{person.type}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="h-3 w-3" />
+                            {person.email}
+                          </div>
+                          {person.phone && (
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Phone className="h-3 w-3" />
-                              {member.phone}
+                              {person.phone}
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {member.groups.map((group) => (
-                              <Badge
-                                key={group}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                {group}
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {person.role && (
+                          <div className="text-sm">
+                            <div className="font-medium">{person.role}</div>
+                            {person.department && (
+                              <div className="text-muted-foreground">
+                                {person.department}
+                              </div>
+                            )}
+                            {person.permission && (
+                              <Badge variant="secondary" className="mt-1">
+                                {person.permission.replace("_", " ")}
                               </Badge>
-                            ))}
+                            )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="text-sm font-medium">
-                              {member.pathway}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Step {member.pathwayStep} of {member.pathwayTotal}
-                            </div>
-                            <div className="w-24 bg-muted rounded-full h-1">
-                              <div
-                                className="bg-primary h-1 rounded-full transition-all"
-                                style={{
-                                  width: `${
-                                    (member.pathwayStep / member.pathwayTotal) *
-                                    100
-                                  }%`,
-                                }}
-                              />
+                        )}
+                        {person.pathway && (
+                          <div className="text-sm">
+                            <div className="font-medium">{person.pathway}</div>
+                            <div className="text-muted-foreground">
+                              Step {person.pathwayStep} of {person.pathwayTotal}
                             </div>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              member.status === "Active"
-                                ? "default"
-                                : "secondary"
-                            }
-                          >
-                            {member.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>View Profile</DropdownMenuItem>
-                              <DropdownMenuItem>Edit Member</DropdownMenuItem>
-                              <DropdownMenuItem>Send Message</DropdownMenuItem>
-                              <DropdownMenuItem>View Progress</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Visitors Tab */}
-          <TabsContent value="visitors">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Visitors</CardTitle>
-                <CardDescription>
-                  Track and follow up with church visitors
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Visit Date</TableHead>
-                      <TableHead>Interests</TableHead>
-                      <TableHead>Follow-up Status</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {visitors.map((visitor) => (
-                      <TableRow key={visitor.id}>
-                        <TableCell className="font-medium">
-                          {visitor.name}
-                        </TableCell>
-                        <TableCell>{visitor.email}</TableCell>
-                        <TableCell>
-                          {new Date(visitor.visitDate).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
+                        )}
+                        {person.interests && person.interests.length > 0 && (
                           <div className="flex flex-wrap gap-1">
-                            {visitor.interests.map((interest) => (
+                            {person.interests.map((interest) => (
                               <Badge
                                 key={interest}
-                                variant="outline"
+                                variant="secondary"
                                 className="text-xs"
                               >
                                 {interest}
                               </Badge>
                             ))}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              visitor.followUpStatus === "Contacted"
-                                ? "default"
-                                : "secondary"
-                            }
-                          >
-                            {visitor.followUpStatus}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                Contact Visitor
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                Add to Pathway
-                              </DropdownMenuItem>
+                        )}
+                        {person.status && !person.role && (
+                          <Badge variant="secondary">{person.status}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>View Profile</DropdownMenuItem>
+                            <DropdownMenuItem>Send Message</DropdownMenuItem>
+                            {person.type === "Member" && (
+                              <DropdownMenuItem>View Progress</DropdownMenuItem>
+                            )}
+                            {person.type === "Visitor" && (
                               <DropdownMenuItem>
                                 Convert to Member
                               </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Life Groups Tab */}
-          <TabsContent value="groups">
-            <Card>
-              <CardHeader>
-                <CardTitle>Life Groups</CardTitle>
-                <CardDescription>
-                  Manage your church&apos;s small groups and life groups
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Group Name</TableHead>
-                      <TableHead>Leader</TableHead>
-                      <TableHead>Members</TableHead>
-                      <TableHead>Meeting Details</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead></TableHead>
+                            )}
+                            <DropdownMenuItem className="text-destructive">
+                              Remove
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {lifeGroups.map((group) => (
-                      <TableRow key={group.id}>
-                        <TableCell className="font-medium">
-                          {group.name}
-                        </TableCell>
-                        <TableCell>{group.leader}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            {group.members}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-sm">
-                              <Calendar className="h-3 w-3" />
-                              {group.meetingTime}
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <MapPin className="h-3 w-3" />
-                              {group.location}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="default">{group.status}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>View Group</DropdownMenuItem>
-                              <DropdownMenuItem>Edit Group</DropdownMenuItem>
-                              <DropdownMenuItem>
-                                Manage Members
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>Send Message</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

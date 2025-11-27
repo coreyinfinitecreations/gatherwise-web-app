@@ -28,11 +28,13 @@ import {
   Trash2,
   Wifi,
   WifiOff,
+  Sparkles,
 } from "lucide-react";
 import { CampusSelector } from "@/components/campus/campus-selector";
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
 import { useNotifications } from "@/contexts/notification-context";
+import { useAIChat } from "@/contexts/ai-chat-context";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -40,6 +42,8 @@ import { formatDistanceToNow } from "date-fns";
 export function DashboardHeader() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { isVisible: isAIChatVisible, toggleVisibility: toggleAIChat } =
+    useAIChat();
   const {
     notifications,
     unreadCount,
@@ -154,10 +158,15 @@ export function DashboardHeader() {
           )}
         </Button>
 
-        {/* Quick Actions */}
-        <Button size="sm" className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Member
+        {/* AI Assistant Toggle */}
+        <Button
+          size="sm"
+          variant={isAIChatVisible ? "default" : "outline"}
+          className="gap-2"
+          onClick={toggleAIChat}
+        >
+          <Sparkles className="h-4 w-4" />
+          AI Assistant
         </Button>
 
         {/* Notifications */}

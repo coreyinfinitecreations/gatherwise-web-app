@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -285,9 +286,11 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full mt-6">
-              Manage Pathways
-            </Button>
+            <Link href="/dashboard/pathways" className="w-full">
+              <Button variant="outline" className="w-full mt-6">
+                Manage Pathways
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

@@ -39,7 +39,7 @@ let passkeyUsers: PasskeyUser[] = [];
 let demoSetupComplete = false;
 
 // RP (Relying Party) configuration
-const rpName = "Gatherwise Church Management";
+const rpName = "Gatherflow Church Management";
 const rpID = "localhost"; // In production, use your domain
 const origin = `http://${rpID}:3002`; // In production, use https://yourdomain.com
 

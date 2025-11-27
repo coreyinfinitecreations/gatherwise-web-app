@@ -258,7 +258,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-primary flex items-center justify-center p-6">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Welcome to Gatherwise!</CardTitle>
+          <CardTitle className="text-2xl">Welcome to Gatherflow!</CardTitle>
           <CardDescription>
             Let's finish setting up your church management system
           </CardDescription>

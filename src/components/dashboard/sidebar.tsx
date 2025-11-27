@@ -52,12 +52,8 @@ const baseNavigation: NavigationItem[] = [
   },
   {
     title: "People",
+    url: "/dashboard/people",
     icon: Users,
-    items: [
-      { title: "All Members", url: "/dashboard/people" },
-      { title: "Add Member", url: "/dashboard/people/add" },
-      { title: "Visitors", url: "/dashboard/people/visitors" },
-    ],
   },
   {
     title: "Life Groups",
@@ -169,7 +165,7 @@ export function DashboardSidebar() {
             <Church className="h-4 w-4 text-primary dark:text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">Gatherwise</h2>
+            <h2 className="text-lg font-semibold text-white">Gatherflow</h2>
             <p className="text-xs text-white/70">{organizationName}</p>
           </div>
         </div>

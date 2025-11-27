@@ -5,7 +5,7 @@ import {
 } from "@simplewebauthn/server";
 
 // In production, these should come from environment variables
-const rpName = "Gatherwise Church Management";
+const rpName = "Gatherflow Church Management";
 const rpID = "localhost";
 const origin = `http://${rpID}:3002`;
 

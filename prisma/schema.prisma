@@ -55,6 +55,7 @@ model User {
   maritalStatus       String?
   anniversary         DateTime?
   themePreference     String?              @default("light")
+  aiChatVisible       Boolean              @default(true)
   isActive            Boolean              @default(true)
   loginAttempts       Int                  @default(0)
   lockedUntil         DateTime?

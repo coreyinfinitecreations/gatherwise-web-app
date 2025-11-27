@@ -11,9 +11,9 @@ export async function setupDemoPasskeys() {
 
     // Demo users to set up passkeys for
     const demoUsers = [
-      "admin@gatherwise.com",
-      "pastor@gatherwise.com",
-      "staff@gatherwise.com",
+      "admin@gatherflow.co",
+      "pastor@gatherflow.co",
+      "staff@gatherflow.co",
     ];
 
     console.log("Demo passkey setup available for:", demoUsers);
@@ -27,9 +27,9 @@ export async function setupDemoPasskeys() {
 2. Try clicking "Sign in with Touch ID/Face ID" (if available on your device)
 3. For demo accounts, you can register passkeys after logging in with password first
 4. Supported demo accounts:
-   - admin@gatherwise.com / Password123!
-   - pastor@gatherwise.com / Password123!
-   - staff@gatherwise.com / Password123!
+   - admin@gatherflow.co / Password123!
+   - pastor@gatherflow.co / Password123!
+   - staff@gatherflow.co / Password123!
 
 Note: Passkeys require HTTPS in production and a registered domain.
 In development (localhost), most browsers will work for testing.

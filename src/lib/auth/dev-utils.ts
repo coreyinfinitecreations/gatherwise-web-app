@@ -5,19 +5,19 @@ import { prisma } from "@/lib/prisma";
 export async function createTestAccounts() {
   const testAccounts = [
     {
-      email: "member@gatherwise.com",
+      email: "member@gatherflow.co",
       password: "Password123!",
       name: "John Member",
       role: "MEMBER" as const,
     },
     {
-      email: "youth.pastor@gatherwise.com",
+      email: "youth.pastor@gatherflow.co",
       password: "Password123!",
       name: "Sarah Youth Pastor",
       role: "PASTOR" as const,
     },
     {
-      email: "finance@gatherwise.com",
+      email: "finance@gatherflow.co",
       password: "Password123!",
       name: "Mike Finance",
       role: "LEADER" as const,

@@ -17,7 +17,7 @@ async function main() {
   });
   console.log("✅ Church GW-2025-CQOHMKNYC created/verified");
 
-  const adminEmail = "admin@gatherwise.com";
+  const adminEmail = "admin@gatherflow.co";
   const existingAdmin = await prisma.user.findUnique({
     where: { email: adminEmail },
   });
@@ -30,7 +30,7 @@ async function main() {
     await prisma.user.update({
       where: { email: adminEmail },
       data: {
-        organizationName: "Gatherwise Demo Church",
+        organizationName: "Gatherflow Demo Church",
         organizationId: "GW-2025-DEMO",
       },
     });
@@ -48,8 +48,8 @@ async function main() {
     if (!existingChurch) {
       const church = await prisma.church.create({
         data: {
-          name: "Gatherwise Demo Church",
-          description: "A demonstration church for the Gatherwise platform",
+          name: "Gatherflow Demo Church",
+          description: "A demonstration church for the Gatherflow platform",
           address: "123 Main Street, Demo City, ST 12345",
           phone: "(555) 123-4567",
           email: "info@gatherwisedemo.org",
@@ -116,7 +116,7 @@ async function main() {
       role: "SUPER_ADMIN",
       isActive: true,
       loginAttempts: 0,
-      organizationName: "Gatherwise Demo Church",
+      organizationName: "Gatherflow Demo Church",
       organizationId: "GW-2025-DEMO",
     },
   });
@@ -126,8 +126,8 @@ async function main() {
 
   const church = await prisma.church.create({
     data: {
-      name: "Gatherwise Demo Church",
-      description: "A demonstration church for the Gatherwise platform",
+      name: "Gatherflow Demo Church",
+      description: "A demonstration church for the Gatherflow platform",
       address: "123 Main Street, Demo City, ST 12345",
       phone: "(555) 123-4567",
       email: "info@gatherwisedemo.org",
