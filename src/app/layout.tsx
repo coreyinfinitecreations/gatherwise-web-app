@@ -9,6 +9,7 @@ import { NotificationProvider } from "@/contexts/notification-context";
 import { QueryProvider } from "@/providers/query-provider";
 import { ToastContainer } from "react-toastify";
 import { NotificationToast } from "@/components/ui/notification-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
                 <CampusProvider>
                   {children}
                   <NotificationToast />
+                  <Toaster />
                 </CampusProvider>
               </NotificationProvider>
               <ToastContainer
