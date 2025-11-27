@@ -20,10 +20,7 @@ export async function POST(
     });
 
     if (!original) {
-      return NextResponse.json(
-        { error: "Pathway not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Pathway not found" }, { status: 404 });
     }
 
     const duplicate = await prisma.pathway.create({

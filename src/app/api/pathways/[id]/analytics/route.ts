@@ -32,10 +32,7 @@ export async function GET(
     });
 
     if (!pathway) {
-      return NextResponse.json(
-        { error: "Pathway not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Pathway not found" }, { status: 404 });
     }
 
     const totalEnrolled = pathway.progress.length;
@@ -63,14 +60,12 @@ export async function GET(
       inProgress,
       completionRate: Math.round(completionRate),
       stepAnalytics,
-      recentProgress: pathway.progress
-        .slice(0, 10)
-        .map((p) => ({
-          memberName: p.user.name || "Unknown",
-          currentStep: p.currentStep,
-          startedAt: p.startedAt,
-          completedAt: p.completedAt,
-        })),
+      recentProgress: pathway.progress.slice(0, 10).map((p) => ({
+        memberName: p.user.name || "Unknown",
+        currentStep: p.currentStep,
+        startedAt: p.startedAt,
+        completedAt: p.completedAt,
+      })),
     };
 
     return NextResponse.json({ analytics }, { status: 200 });

@@ -62,7 +62,7 @@ export function EnrollMembersDialog({
       if (user?.organizationId) {
         params.append("churchId", user.organizationId);
       }
-      
+
       const response = await fetch(`/api/users?${params}`);
       if (response.ok) {
         const data = await response.json();
@@ -115,13 +115,15 @@ export function EnrollMembersDialog({
       }
 
       const data = await response.json();
-      
+
       if (data.skipped > 0) {
         toast.success(
           `Enrolled ${data.enrollments.length} member(s). ${data.skipped} already enrolled.`
         );
       } else {
-        toast.success(`Successfully enrolled ${data.enrollments.length} member(s)`);
+        toast.success(
+          `Successfully enrolled ${data.enrollments.length} member(s)`
+        );
       }
 
       onSuccess();
@@ -233,14 +235,19 @@ export function EnrollMembersDialog({
           >
             Cancel
           </Button>
-          <Button onClick={handleEnroll} disabled={loading || selectedMembers.size === 0}>
+          <Button
+            onClick={handleEnroll}
+            disabled={loading || selectedMembers.size === 0}
+          >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Enrolling...
               </>
             ) : (
-              `Enroll ${selectedMembers.size} Member${selectedMembers.size !== 1 ? "s" : ""}`
+              `Enroll ${selectedMembers.size} Member${
+                selectedMembers.size !== 1 ? "s" : ""
+              }`
             )}
           </Button>
         </DialogFooter>

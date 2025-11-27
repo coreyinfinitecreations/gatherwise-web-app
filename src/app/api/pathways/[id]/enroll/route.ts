@@ -22,10 +22,7 @@ export async function POST(
     });
 
     if (!pathway) {
-      return NextResponse.json(
-        { error: "Pathway not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Pathway not found" }, { status: 404 });
     }
 
     const enrollments = await Promise.all(

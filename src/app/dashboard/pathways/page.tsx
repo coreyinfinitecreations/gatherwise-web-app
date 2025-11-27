@@ -60,9 +60,14 @@ export default function PathwaysPage() {
   const [enrollDialogOpen, setEnrollDialogOpen] = useState(false);
   const [manageEnrollmentsOpen, setManageEnrollmentsOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedPathwayId, setSelectedPathwayId] = useState<string | null>(null);
+  const [selectedPathwayId, setSelectedPathwayId] = useState<string | null>(
+    null
+  );
   const [selectedPathwayName, setSelectedPathwayName] = useState<string>("");
-  const [pathwayToDelete, setPathwayToDelete] = useState<{id: string, name: string} | null>(null);
+  const [pathwayToDelete, setPathwayToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const fetchPathways = async () => {
     try {
@@ -74,17 +79,25 @@ export default function PathwaysPage() {
       const response = await fetch(`/api/pathways?${params}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched pathways:', data.pathways?.length, 'pathways');
+        console.log("Fetched pathways:", data.pathways?.length, "pathways");
         setPathways(data.pathways || []);
-        
-        const enrolled = data.pathways?.reduce((sum: number, p: any) => sum + (p._count?.progress || 0), 0) || 0;
-        const completed = data.pathways?.reduce((sum: number, p: any) => {
-          return sum + (p.progress?.filter((prog: any) => prog.completedAt)?.length || 0);
-        }, 0) || 0;
-        
+
+        const enrolled =
+          data.pathways?.reduce(
+            (sum: number, p: any) => sum + (p._count?.progress || 0),
+            0
+          ) || 0;
+        const completed =
+          data.pathways?.reduce((sum: number, p: any) => {
+            return (
+              sum +
+              (p.progress?.filter((prog: any) => prog.completedAt)?.length || 0)
+            );
+          }, 0) || 0;
+
         setTotalEnrolled(enrolled);
         setTotalCompleted(completed);
-        
+
         return data.pathways || [];
       }
     } catch (error) {
@@ -117,28 +130,30 @@ export default function PathwaysPage() {
 
   const handleDuplicate = async (pathwayId: string) => {
     try {
-      console.log('Duplicating pathway:', pathwayId);
+      console.log("Duplicating pathway:", pathwayId);
       const response = await fetch(`/api/pathways/${pathwayId}/duplicate`, {
         method: "POST",
       });
 
-      console.log('Duplicate response status:', response.status);
-      
+      console.log("Duplicate response status:", response.status);
+
       if (response.ok) {
         const result = await response.json();
-        console.log('Duplicate result:', result);
-        console.log('Fetching pathways after duplicate...');
+        console.log("Duplicate result:", result);
+        console.log("Fetching pathways after duplicate...");
         const updatedPathways = await fetchPathways();
-        console.log('Pathways refetched, new count:', updatedPathways?.length);
+        console.log("Pathways refetched, new count:", updatedPathways?.length);
         toast.success("Pathway duplicated successfully");
       } else {
         const errorData = await response.json();
-        console.error('Duplicate error response:', errorData);
+        console.error("Duplicate error response:", errorData);
         throw new Error(errorData.error || "Failed to duplicate");
       }
     } catch (error: any) {
       console.error("Duplicate error:", error);
-      toast.error(error.message || "Failed to duplicate pathway. Please try again.");
+      toast.error(
+        error.message || "Failed to duplicate pathway. Please try again."
+      );
     }
   };
 
@@ -164,7 +179,9 @@ export default function PathwaysPage() {
       }
     } catch (error: any) {
       console.error("Delete error:", error);
-      toast.error(error.message || "Failed to delete pathway. Please try again.");
+      toast.error(
+        error.message || "Failed to delete pathway. Please try again."
+      );
     } finally {
       setDeleteDialogOpen(false);
       setPathwayToDelete(null);
@@ -347,7 +364,9 @@ export default function PathwaysPage() {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => handleDeleteClick(pathway.id, pathway.name)}
+                                onClick={() =>
+                                  handleDeleteClick(pathway.id, pathway.name)
+                                }
                                 className="text-destructive focus:text-destructive"
                               >
                                 Delete
@@ -441,7 +460,9 @@ export default function PathwaysPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the pathway &quot;{pathwayToDelete?.name}&quot; and all associated data. This action cannot be undone.
+              This will permanently delete the pathway &quot;
+              {pathwayToDelete?.name}&quot; and all associated data. This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

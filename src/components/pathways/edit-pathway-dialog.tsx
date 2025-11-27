@@ -96,9 +96,7 @@ export function EditPathwayDialog({
     value: string
   ) => {
     setSteps(
-      steps.map((step, i) =>
-        i === index ? { ...step, [field]: value } : step
-      )
+      steps.map((step, i) => (i === index ? { ...step, [field]: value } : step))
     );
   };
 

@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function checkChurches() {
   try {
     console.log("Checking churches in database...\n");
-    
+
     const churches = await prisma.church.findMany({
       select: {
         id: true,

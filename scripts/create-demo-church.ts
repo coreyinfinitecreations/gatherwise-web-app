@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function createDemoChurch() {
   try {
     console.log("Creating demo church with ID: GW-2025-DEMO\n");
-    
+
     const church = await prisma.church.create({
       data: {
         id: "GW-2025-DEMO",

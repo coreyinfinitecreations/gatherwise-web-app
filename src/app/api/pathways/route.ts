@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       include: {
         steps: {
           orderBy: {
-            order: 'asc',
+            order: "asc",
           },
         },
         progress: {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       include: {
         steps: {
           orderBy: {
-            order: 'asc',
+            order: "asc",
           },
         },
       },

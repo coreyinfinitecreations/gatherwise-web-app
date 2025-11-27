@@ -136,7 +136,9 @@ export function ManageEnrollmentsDialog({
 
   const getProgressPercentage = (enrollment: Enrollment) => {
     if (enrollment.completedAt) return 100;
-    return Math.round((enrollment.completions.length / enrollment.currentStep) * 100);
+    return Math.round(
+      (enrollment.completions.length / enrollment.currentStep) * 100
+    );
   };
 
   return (
@@ -163,7 +165,8 @@ export function ManageEnrollmentsDialog({
                 />
               </div>
               <div className="text-sm text-muted-foreground">
-                {filteredEnrollments.length} member{filteredEnrollments.length !== 1 ? "s" : ""} enrolled
+                {filteredEnrollments.length} member
+                {filteredEnrollments.length !== 1 ? "s" : ""} enrolled
               </div>
             </div>
 
@@ -216,7 +219,9 @@ export function ManageEnrollmentsDialog({
                               <div
                                 className="bg-primary h-1.5 rounded-full transition-all"
                                 style={{
-                                  width: `${getProgressPercentage(enrollment)}%`,
+                                  width: `${getProgressPercentage(
+                                    enrollment
+                                  )}%`,
                                 }}
                               />
                             </div>

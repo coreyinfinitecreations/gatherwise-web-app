@@ -25,10 +25,7 @@ export async function GET(
     });
 
     if (!pathway) {
-      return NextResponse.json(
-        { error: "Pathway not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Pathway not found" }, { status: 404 });
     }
 
     return NextResponse.json({ pathway }, { status: 200 });
