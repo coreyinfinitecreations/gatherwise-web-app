@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import {
   Card,
@@ -43,6 +46,7 @@ import {
   Mail,
   MessageSquare,
 } from "lucide-react";
+import { LifeGroupHeatMap } from "@/components/maps/life-group-heat-map";
 
 const lifeGroups = [
   {
@@ -171,6 +175,77 @@ const lifeGroupStats = {
   newGroupsThisMonth: 2,
 };
 
+const lifeGroupLocations = [
+  { name: "Young Professionals", lat: 35.8456, lng: -86.3903, members: 12 },
+  { name: "Families with Kids", lat: 35.8556, lng: -86.4003, members: 8 },
+  { name: "Senior Saints", lat: 35.8356, lng: -86.3803, members: 15 },
+  { name: "College & Career", lat: 35.8656, lng: -86.4103, members: 10 },
+  { name: "Women's Bible Study", lat: 35.8256, lng: -86.3703, members: 14 },
+  { name: "Men's Fellowship", lat: 35.8756, lng: -86.4203, members: 11 },
+  { name: "Spanish Life Group", lat: 35.8156, lng: -86.3603, members: 16 },
+  { name: "Young Couples", lat: 35.8456, lng: -86.4303, members: 9 },
+  { name: "Empty Nesters", lat: 35.8856, lng: -86.3503, members: 13 },
+  { name: "New Believers", lat: 35.8056, lng: -86.4403, members: 7 },
+];
+
+const underservedAreas = [
+  {
+    name: "East Murfreesboro",
+    description: "No groups within 3 miles • Est. 2,500 residents",
+    coverage: "none",
+    lat: 35.8456,
+    lng: -86.3203,
+  },
+  {
+    name: "Gateway Area",
+    description: "Only 1 group nearby (at 12 capacity) • 4,000+ area residents",
+    coverage: "low",
+    lat: 35.8756,
+    lng: -86.4703,
+  },
+  {
+    name: "Blackman Community",
+    description: "No groups within 5 miles • Growing community",
+    coverage: "none",
+    lat: 35.7956,
+    lng: -86.3403,
+  },
+];
+
+const coverageAreas = [
+  { name: "Downtown", coverage: "high", groups: 3, color: "bg-green-500" },
+  {
+    name: "Mission District",
+    coverage: "high",
+    groups: 2,
+    color: "bg-green-500",
+  },
+  { name: "Nob Hill", coverage: "medium", groups: 2, color: "bg-yellow-500" },
+  { name: "SoMa", coverage: "medium", groups: 1, color: "bg-yellow-500" },
+  {
+    name: "Potrero Hill",
+    coverage: "medium",
+    groups: 1,
+    color: "bg-yellow-500",
+  },
+  { name: "Castro", coverage: "medium", groups: 1, color: "bg-yellow-500" },
+  {
+    name: "Russian Hill",
+    coverage: "medium",
+    groups: 1,
+    color: "bg-yellow-500",
+  },
+  { name: "Dogpatch", coverage: "low", groups: 1, color: "bg-orange-500" },
+  { name: "Sunset District", coverage: "none", groups: 0, color: "bg-red-500" },
+  {
+    name: "Richmond District",
+    coverage: "none",
+    groups: 0,
+    color: "bg-red-500",
+  },
+  { name: "Outer Mission", coverage: "none", groups: 0, color: "bg-red-500" },
+];
+
 export default function LifeGroupsPage() {
   return (
     <DashboardLayout>
@@ -263,6 +338,7 @@ export default function LifeGroupsPage() {
           <TabsList>
             <TabsTrigger value="groups">All Groups</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
+            <TabsTrigger value="coverage">Coverage Map</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
@@ -524,6 +600,85 @@ export default function LifeGroupsPage() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Coverage Map Tab */}
+          <TabsContent value="coverage">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Life Group Coverage Heat Map</CardTitle>
+                  <CardDescription>
+                    Visualize geographic coverage and identify underserved areas
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <LifeGroupHeatMap
+                    locations={lifeGroupLocations}
+                    underservedAreas={underservedAreas}
+                    center={{ lat: 35.8456, lng: -86.3903 }}
+                    zoom={12}
+                    radiusMiles={1.5}
+                    cityName="Murfreesboro"
+                    countyName="Rutherford County"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Each circle represents a 1.5-mile coverage radius around
+                    life group locations. Heat intensity shows member
+                    concentration. Use the &quot;Map Layers&quot; button to
+                    toggle ZIP codes and boundary overlays.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Underserved Areas */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Underserved Areas</CardTitle>
+                  <CardDescription>
+                    Neighborhoods that could benefit from new life groups
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {underservedAreas.map((area) => (
+                      <div
+                        key={area.name}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`h-10 w-10 rounded-full ${
+                              area.coverage === "none"
+                                ? "bg-red-500/10"
+                                : "bg-yellow-500/10"
+                            } flex items-center justify-center`}
+                          >
+                            <MapPin
+                              className={`h-5 w-5 ${
+                                area.coverage === "none"
+                                  ? "text-red-500"
+                                  : "text-yellow-500"
+                              }`}
+                            />
+                          </div>
+                          <div>
+                            <p className="font-medium">{area.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {area.description}
+                            </p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Start Group
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Schedule Tab */}

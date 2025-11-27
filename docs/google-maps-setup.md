@@ -1,6 +1,9 @@
 # Google Maps API Setup
 
-The application uses Google Maps Places API for address autocomplete functionality in the profile page.
+The application uses Google Maps for multiple features:
+
+- **Places API**: Address autocomplete in profile pages
+- **Maps JavaScript API + Visualization Library**: Heat maps for Life Group coverage analysis
 
 ## Setup Instructions
 
@@ -8,10 +11,13 @@ The application uses Google Maps Places API for address autocomplete functionali
 
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select an existing one
-3. Enable the **Places API** for your project:
+3. Enable the required APIs for your project:
    - Navigate to "APIs & Services" > "Library"
-   - Search for "Places API"
-   - Click on it and press "Enable"
+   - Search for and enable:
+     - **Places API** (for address autocomplete)
+     - **Maps JavaScript API** (for map visualization)
+     - **Geocoding API** (for ZIP code and boundary overlays)
+   - Click on each and press "Enable"
 4. Create credentials:
    - Go to "APIs & Services" > "Credentials"
    - Click "Create Credentials" > "API Key"
@@ -38,7 +44,10 @@ The application uses Google Maps Places API for address autocomplete functionali
    - For production: Add your production domain(s)
 3. Under "API restrictions":
    - Select "Restrict key"
-   - Choose "Places API" from the dropdown
+   - Choose all three APIs from the dropdown:
+     - Places API
+     - Maps JavaScript API
+     - Geocoding API
 
 ### 4. Restart Your Development Server
 
@@ -47,6 +56,25 @@ After adding the API key, restart your Next.js development server:
 ```bash
 npm run dev
 ```
+
+## Features Using Google Maps
+
+### Life Group Heat Map
+
+Location: `/dashboard/life-groups` (Coverage Map tab)
+
+The heat map visualization shows:
+
+- Geographic distribution of life groups
+- Coverage intensity based on member counts
+- Marker pins for each life group location
+- Custom gradient from cyan → blue → purple → red
+
+The component automatically:
+
+- Loads the Maps JavaScript API with visualization library
+- Centers the map on the church's region
+- Displays error messages if API key is missing
 
 ## Features
 
