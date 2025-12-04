@@ -11,6 +11,7 @@ import {
   Loader2,
   Minimize2,
   Maximize2,
+  GripVertical,
   Maximize,
 } from "lucide-react";
 import { useAIChat } from "@/contexts/ai-chat-context";
@@ -32,6 +33,7 @@ export function AIChatBubble() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,6 +72,67 @@ export function AIChatBubble() {
 
     return () => clearInterval(interval);
   }, [typingMessageId]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    if (!position) return;
+
+    e.preventDefault();
+    dragRef.current = {
+      isDragging: true,
+      startX: e.clientX,
+      startY: e.clientY,
+      offsetX: e.clientX - position.x,
+      offsetY: e.clientY - position.y,
+    };
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragRef.current.isDragging) return;
+
+      e.preventDefault();
+
+      const newX = e.clientX - dragRef.current.offsetX;
+      const newY = e.clientY - dragRef.current.offsetY;
+
+      const newPosition = {
+        x: Math.max(0, Math.min(newX, window.innerWidth - 56)),
+        y: Math.max(0, Math.min(newY, window.innerHeight - 56)),
+      };
+
+      setPosition(newPosition);
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!dragRef.current.isDragging) return;
+
+      const dragDistance = Math.sqrt(
+        Math.pow(e.clientX - dragRef.current.startX, 2) +
+          Math.pow(e.clientY - dragRef.current.startY, 2)
+      );
+
+      dragRef.current.isDragging = false;
+      setIsDragging(false);
+
+      if (position) {
+        localStorage.setItem("aiChatBubblePosition", JSON.stringify(position));
+      }
+
+      if (dragDistance < 5 && !isOpen) {
+        setIsOpen(true);
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isOpen, position]);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -131,17 +194,76 @@ export function AIChatBubble() {
     }
   };
 
-  if (!isVisible || pathname === "/dashboard/ai-assistant") return null;
+  if (!shouldRender || pathname === "/dashboard/ai-assistant") return null;
+
+  if (!isOpen) {
+    return (
+      <div
+        className="fixed z-50"
+        style={{
+          left: position ? `${position.x}px` : "0px",
+          top: position ? `${position.y}px` : "0px",
+          cursor: isDragging ? "grabbing" : "grab",
+          opacity: isAnimating && position ? 1 : 0,
+          transform: isAnimating
+            ? "translateY(0) scale(1)"
+            : "translateY(200px) scale(0.3)",
+          transition: isDragging
+            ? "none"
+            : "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}
+        onMouseDown={(e) => {
+          if (!position) return;
+          e.preventDefault();
+          dragRef.current = {
+            isDragging: true,
+            startX: e.clientX,
+            startY: e.clientY,
+            offsetX: e.clientX - position.x,
+            offsetY: e.clientY - position.y,
+          };
+          setIsDragging(true);
+        }}
+      >
+        <Button
+          size="lg"
+          className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 pointer-events-none"
+        >
+          <Sparkles className="h-6 w-6" />
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-96 animate-in slide-in-from-bottom-5 fade-in duration-300">
+    <div
+      ref={chatRef}
+      className="fixed z-50"
+      style={{
+        left: position ? `${position.x}px` : "0px",
+        top: position ? `${position.y}px` : "0px",
+        cursor: isDragging ? "grabbing" : "default",
+        opacity: isAnimating && position ? 1 : 0,
+        transform: isAnimating
+          ? "translateY(0) scale(1)"
+          : "translateY(200px) scale(0.3)",
+        transition: isDragging
+          ? "none"
+          : "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      }}
+    >
       <div
-        className={`bg-background border rounded-lg shadow-2xl flex flex-col transition-all duration-200 ${
-          isMinimized ? "h-16" : "h-[600px]"
+        className={`bg-background border rounded-lg shadow-2xl flex flex-col ${
+          isMinimized ? "w-80 h-16" : "w-96 h-[600px]"
         }`}
       >
-        <div className="flex items-center justify-between p-4 border-b">
+        {/* Header */}
+        <div
+          className="flex items-center justify-between p-4 border-b cursor-grab active:cursor-grabbing"
+          onMouseDown={handleMouseDown}
+        >
           <div className="flex items-center gap-2">
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
@@ -177,7 +299,7 @@ export function AIChatBubble() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleVisibility}
+              onClick={() => setIsOpen(false)}
               className="h-8 w-8"
             >
               <X className="h-4 w-4" />
@@ -187,6 +309,7 @@ export function AIChatBubble() {
 
         {!isMinimized && (
           <>
+            {/* Messages */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
                 {messages.length === 0 && (
@@ -218,30 +341,38 @@ export function AIChatBubble() {
                     </div>
                   </div>
                 ))}
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted rounded-lg px-4 py-2 flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm text-muted-foreground">
+                        Thinking...
+                      </span>
+                    </div>
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
 
+            {/* Input */}
             <div className="p-4 border-t">
               <div className="flex gap-2">
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
+                  onKeyPress={handleKeyPress}
                   placeholder="Ask me anything..."
                   disabled={loading}
                   className="flex-1"
+                  autoComplete="off"
                 />
                 <Button
                   onClick={handleSend}
                   disabled={loading || !input.trim()}
                   size="icon"
                 >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
+                  <Send className="h-4 w-4" />
                 </Button>
               </div>
             </div>
